@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	DefaultMemoryLimitPathV2Fix = "/sys/fs/cgroup/memory.max_usage_in_bytes"
+	DefaultMemoryLimitPathV2Fix = "/sys/fs/cgroup/memory/memory.max_usage_in_bytes"
 )
 
 func main() {
