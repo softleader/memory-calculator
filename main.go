@@ -25,7 +25,7 @@ func main() {
 		os.Setenv("BPL_JVM_HEAD_ROOM", "0")
 	}
 	if _, ok := os.LookupEnv("BPL_JVM_THREAD_COUNT"); !ok {
-		os.Setenv("BPL_JVM_THREAD_COUNT", "250")
+		os.Setenv("BPL_JVM_THREAD_COUNT", "200")
 	}
 	if _, ok := os.LookupEnv("BPI_APPLICATION_PATH"); !ok {
 		os.Setenv("BPI_APPLICATION_PATH", "/app")
