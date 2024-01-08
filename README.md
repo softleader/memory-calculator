@@ -1,26 +1,25 @@
-# memory-calculator
+# 記憶體計算工具（Memory Calculator）
 
-memory-calculator 是基於 [paketo-buildpacks/libjvm](https://github.com/paketo-buildpacks/libjvm/) 所撰寫幫助 JVM 在
-Runtime 時計算記憶體設定的工具
+**記憶體計算工具**是為了協助 Java
+虛擬機（JVM）在運行時計算記憶體設定而開發的工具，基於 [paketo-buildpacks/libjvm](https://github.com/paketo-buildpacks/libjvm/)。
 
-## PreRequirement:
+## 先備條件：
 
 - Golang: v1.20+
 - Jib ContainerTool
-- Linux base image
+- Linux 基礎映像
 
-## Configuration
+## 配置項目：
 
-| Environment Variable          | Description                                                                                                |
-|-------------------------------|------------------------------------------------------------------------------------------------------------|
-| `$BPL_JVM_HEAD_ROOM`          | Configure the percentage of headroom the memory calculator will allocated.  Defaults to `0`.               |
-| `$BPL_JVM_LOADED_CLASS_COUNT` | Configure the number of classes that will be loaded at runtime.  Defaults to 35% of the number of classes. |
-| `$BPL_JVM_THREAD_COUNT`       | Configure the number of user threads at runtime.  Defaults to `250`.                                       |
-| `$JAVA_HOME`                  | Configure the JRE location                                                                                 |
-| `$JAVA_OPTS`                  | Configure the JAVA launch flags                                                                            |
-| `$JAVA_TOOL_OPTIONS`          | Configure the JVM launch flags                                                                             |
+- `$BPL_JVM_HEAD_ROOM`：記憶體計算工具分配的預留空間百分比，預設為 `0`。
+- `$BPL_JVM_LOADED_CLASS_COUNT`：運行時將加載的類的數量，預設為總類數的35%。
+- `$BPL_JVM_THREAD_COUNT`：運行時的用戶線程數，預設為 `200`。
+- `$JAVA_HOME`：JRE的安裝位置。
+- `$JAVA_OPTS`：Java啟動選項。
+- `$JAVA_TOOL_OPTIONS`：JVM啟動選項(由JVM提供)。
 
-## Usage
+## 使用方法：
 
-Put `memory-calculator` and `entrypoint.sh` in `/tmp` and custom entrypoint to `/tmp/entrypoint.sh`
-Don't use `jvmFlags` but point to `JAVA_OPTS` environment variable
+1. 將 **記憶體計算工具** 和 `entrypoint.sh` 放置於 `/tmp` 目錄。
+2. 自定義入口點為 `/tmp/entrypoint.sh`。
+3. 避免使用 `jvmFlags`，改用 `JAVA_OPTS` 環境變數。
