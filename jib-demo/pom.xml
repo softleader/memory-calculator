@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.1</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>org.example</groupId>
+    <artifactId>jib-demo</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>jib-demo</name>
+    <description>jib-demo</description>
+    <properties>
+        <container-base-image>harbor.softleader.com.tw/library/eclipse-temurin-alpine:17-jre-mc-taipei
+        </container-base-image>
+        <container-image-project>demo</container-image-project>
+        <container-image-repository>harbor.softleader.com.tw</container-image-repository>
+        <java.version>17</java.version>
+        <jib-maven-plugin.version>3.4.0</jib-maven-plugin.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin.version}</version>
+                <configuration>
+                    <from>
+                        <image>${container-base-image}</image>
+                    </from>
+                    <to>
+                        <image>${container-image-repository}/${container-image-project}/${project.artifactId}</image>
+                        <tags>
+                            <tag>${project.version}</tag>
+                        </tags>
+                    </to>
+                    <container>
+                        <environment>
+                            <JAVA_OPTS>-XX:+UseZGC -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true
+                                -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+                            </JAVA_OPTS>
+                        </environment>
+                        <entrypoint>sh,/tmp/entrypoint.sh</entrypoint>
+                        <ports>
+                            <port>8080</port>
+                            <port>5005</port>
+                        </ports>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                    </container>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
