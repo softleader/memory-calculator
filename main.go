@@ -87,8 +87,8 @@ func main() {
 	defer file.Close()
 
 	var javaToolOptions = os.Getenv("JAVA_TOOL_OPTIONS")
-	if _, err := file.WriteString(fmt.Sprintf("export JAVA_TOOL_OPTIONS='%s'\n", javaToolOptions)); err != nil {
-		log.Fatal(err)
+	if _, err2 := file.WriteString(fmt.Sprintf("export JAVA_TOOL_OPTIONS='%s'\n", javaToolOptions)); err2 != nil {
+		log.Fatal(err2)
 	}
 
 	log.Printf("JAVA_TOOL_OPTIONS: %v\n", javaToolOptions)
