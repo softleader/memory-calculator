@@ -68,7 +68,10 @@ func main() {
 
 	// 依序執行 helper
 	for _, cmd := range cmds {
-		if values, err := cmd.Execute(); err == nil {
+		values, err := cmd.Execute()
+		if err != nil {
+			log.Fatal(err)
+		} else {
 			for k, v := range values {
 				v = strings.TrimSpace(v)
 				os.Setenv(k, v) // update golang environment variable
@@ -88,5 +91,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("JAVA_TOOL_OPTIONS: %v", javaToolOptions)
+	log.Printf("JAVA_TOOL_OPTIONS: %v\n", javaToolOptions)
 }
