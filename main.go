@@ -42,6 +42,8 @@ Examples:
 `
 )
 
+var Version = "<unknown>"
+
 type Config struct {
 	jvmOptions        string
 	headRoom          int
@@ -50,6 +52,7 @@ type Config struct {
 	applicationPath   string
 	memoryLimitPathV2 string
 	output            string
+	version           bool
 }
 
 func main() {
@@ -60,6 +63,10 @@ func main() {
 		Long:         desc,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if c.version {
+				fmt.Println(Version)
+				return nil
+			}
 			return run(c)
 		},
 	}
@@ -70,6 +77,7 @@ func main() {
 	flags.IntVar(&c.loadedClassCount, "loaded-class-count", c.loadedClassCount, "the number of classes that will be loaded when the application is running")
 	flags.StringVar(&c.applicationPath, "application-path", c.applicationPath, "the directory on the container where the app's contents are placed")
 	flags.StringVarP(&c.output, "output", "o", c.output, "write to a file, instead of STDOUT")
+	flags.BoolVar(&c.version, "version", c.version, "print version and exit")
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
 	}

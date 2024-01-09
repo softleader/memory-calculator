@@ -13,5 +13,5 @@ gofmt:	## Run gofmt
 	gofmt -s -w main.go
 
 build: bootstrap govet gofmt ## Build app
-	 go build -o ./build/memory-calculator
+	 go build -ldflags="-X 'main.Version=1.0.0'" -o ./build/memory-calculator
 
