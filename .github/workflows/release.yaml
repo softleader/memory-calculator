@@ -8,12 +8,15 @@ permissions:
 
 jobs:
   releases-matrix:
-    name: release linux/amd64
+    name: release binary
     runs-on: ubuntu-latest
     strategy:
       matrix:
         goos: [ linux, darwin ]
-        goarch: [ amd64 ]
+        goarch: [ "386", amd64, arm64 ]
+        exclude:
+          - goarch: "386"
+            goos: darwin
     steps:
       - uses: actions/checkout@v3
       - uses: wangyoucao577/go-release-action@v1
