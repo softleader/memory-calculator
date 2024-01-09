@@ -77,31 +77,25 @@ func main() {
 
 func newConfig() Config {
 	c := Config{
-		jvmOptions:      defaultJvmOptions,
-		headRoom:        defaultHeadRoom,
-		threadCount:     defaultThreadCount,
-		applicationPath: defaultApplicationPath,
+		jvmOptions:        defaultJvmOptions,
+		headRoom:          defaultHeadRoom,
+		threadCount:       defaultThreadCount,
+		applicationPath:   defaultApplicationPath,
+		memoryLimitPathV2: defaultMemoryLimitPathV2Fix,
 	}
-	if val, ok := os.LookupEnv(envJavaToolOptions); ok {
-		c.jvmOptions = val
-	}
+	c.jvmOptions, _ = os.LookupEnv(envJavaToolOptions)
 	if val, ok := os.LookupEnv(envBplJvmHeadRoom); ok {
 		c.headRoom, _ = strconv.Atoi(val)
 	}
 	if val, ok := os.LookupEnv(envBplJvmThreadCount); ok {
 		c.threadCount, _ = strconv.Atoi(val)
 	}
-	if val, ok := os.LookupEnv(envBpiApplicationPath); ok {
-		c.applicationPath = val
-	}
+	c.applicationPath, _ = os.LookupEnv(envBpiApplicationPath)
 	if val, ok := os.LookupEnv(envBpiJvmClassCount); ok {
 		c.loadedClassCount, _ = strconv.Atoi(val)
 	}
 	// 修正部分記憶體限制檔案位置不一致問題
-	var ok bool
-	if c.memoryLimitPathV2, ok = os.LookupEnv(envBpiMemoryLimitPathV2); !ok {
-		c.memoryLimitPathV2 = defaultMemoryLimitPathV2Fix
-	}
+	c.memoryLimitPathV2, _ = os.LookupEnv(envBpiMemoryLimitPathV2)
 	return c
 }
 
