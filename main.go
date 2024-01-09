@@ -6,6 +6,7 @@ import (
 	"github.com/paketo-buildpacks/libjvm/helper"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/sherpa"
+	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"strconv"
@@ -13,49 +14,140 @@ import (
 )
 
 const (
-	DefaultMemoryLimitPathV2Fix = "/sys/fs/cgroup/memory/memory.max_usage_in_bytes"
+	envJavaHome                 = "JAVA_HOME"
+	envJavaToolOptions          = "JAVA_TOOL_OPTIONS"
+	envBplJvmHeadRoom           = "BPL_JVM_HEAD_ROOM"
+	envBplJvmThreadCount        = "BPL_JVM_THREAD_COUNT"
+	envBpiApplicationPath       = "BPI_APPLICATION_PATH"
+	envBpiJvmClassCount         = "BPI_JVM_CLASS_COUNT"
+	envBpiMemoryLimitPathV2     = "BPI_MEMORY_LIMIT_PATH_V2"
+	defaultMemoryLimitPathV2Fix = "/sys/fs/cgroup/memory/memory.max_usage_in_bytes"
+	defaultJvmOptions           = ""
+	defaultHeadRoom             = "0"
+	defaultThreadCount          = "200"
+	defaultApplicationPath      = "/app"
+	desc                        = `This command calculate the JVM memory for applications to run smoothly and stay within the memory limits of the container.
+In order to perform this calculation, the Memory Calculator requires the following input:
+
+  --loaded-class-count: the number of classes that will be loaded when the application is running
+  --thread-count: the number of user threads
+  --jvm-options: VM Options, typically JAVA_TOOL_OPTIONS
+  --head-room: percentage of total memory available which will be left unallocated to cover JVM overhead
+  --application-path: the directory on the container where the app's contents are placed
+  --output: write to a file, instead of STDOUT
+
+Examples:
+  # Use ZGC and output to /tmp/.env 
+  memory-calculator --jvm-options '-XX:+UseZGC' -o '/tmp/.env'
+`
 )
 
+type Config struct {
+	jvmOptions        string
+	headRoom          string
+	threadCount       string
+	loadedClassCount  string
+	applicationPath   string
+	memoryLimitPathV2 string
+	output            string
+}
+
 func main() {
-	// 準備需要的環境變數
-	if _, ok := os.LookupEnv("JAVA_TOOL_OPTIONS"); !ok {
-		os.Setenv("JAVA_TOOL_OPTIONS", "")
+	c := newConfig()
+	cmd := &cobra.Command{
+		Use:          "memory-calculator",
+		Short:        "JVM Memory Calculator",
+		Long:         desc,
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return run(c)
+		},
 	}
-	if _, ok := os.LookupEnv("BPL_JVM_HEAD_ROOM"); !ok {
-		os.Setenv("BPL_JVM_HEAD_ROOM", "0")
+	flags := cmd.Flags()
+	flags.StringVar(&c.jvmOptions, "jvm-options", c.jvmOptions, "vm options, typically JAVA_TOOL_OPTIONS")
+	flags.StringVar(&c.headRoom, "head-room", c.headRoom, "percentage of total memory available which will be left unallocated to cover JVM overhead")
+	flags.StringVar(&c.threadCount, "thread-count", c.threadCount, "the number of user threads")
+	flags.StringVar(&c.loadedClassCount, "loaded-class-count", c.loadedClassCount, "the number of classes that will be loaded when the application is running")
+	flags.StringVar(&c.applicationPath, "application-path", c.applicationPath, "the directory on the container where the app's contents are placed")
+	flags.StringVarP(&c.output, "output", "o", c.output, "write to a file, instead of STDOUT")
+	if err := cmd.Execute(); err != nil {
+		os.Exit(1)
 	}
-	if _, ok := os.LookupEnv("BPL_JVM_THREAD_COUNT"); !ok {
-		os.Setenv("BPL_JVM_THREAD_COUNT", "200")
+}
+
+func newConfig() Config {
+	c := Config{
+		jvmOptions:      defaultJvmOptions,
+		headRoom:        defaultHeadRoom,
+		threadCount:     defaultThreadCount,
+		applicationPath: defaultApplicationPath,
 	}
-	if _, ok := os.LookupEnv("BPI_APPLICATION_PATH"); !ok {
-		os.Setenv("BPI_APPLICATION_PATH", "/app")
+	if val, ok := os.LookupEnv(envJavaToolOptions); ok {
+		c.jvmOptions = val
+	}
+	if val, ok := os.LookupEnv(envBplJvmHeadRoom); ok {
+		c.headRoom = val
+	}
+	if val, ok := os.LookupEnv(envBplJvmThreadCount); ok {
+		c.threadCount = val
+	}
+	if val, ok := os.LookupEnv(envBpiApplicationPath); ok {
+		c.applicationPath = val
+	}
+	if val, ok := os.LookupEnv(envBpiJvmClassCount); ok {
+		c.loadedClassCount = val
+	}
+	// 修正部分記憶體限制檔案位置不一致問題
+	var ok bool
+	if c.memoryLimitPathV2, ok = os.LookupEnv(envBpiMemoryLimitPathV2); !ok {
+		c.memoryLimitPathV2 = defaultMemoryLimitPathV2Fix
+	}
+	return c
+}
+
+func (c *Config) prepareLibJvmEnv() (err error) {
+	if err = os.Setenv(envBplJvmThreadCount, c.jvmOptions); err != nil {
+		return err
+	}
+	if err = os.Setenv(envBplJvmHeadRoom, c.headRoom); err != nil {
+		return err
+	}
+	if err = os.Setenv(envBplJvmThreadCount, c.threadCount); err != nil {
+		return err
+	}
+	if err = os.Setenv(envBpiApplicationPath, c.applicationPath); err != nil {
+		return err
 	}
 	// 計算JVM本身的Class數量
-	if JavaHome, ok := os.LookupEnv("JAVA_HOME"); ok {
-		jvmClassCount, err := count.Classes(JavaHome)
-		if err != nil {
-			log.Fatal(err)
+	if c.loadedClassCount == "" {
+		if javaHome, ok := os.LookupEnv(envJavaHome); !ok {
+			return fmt.Errorf("failed to lookup %v env", envJavaHome)
 		} else {
-			os.Setenv("BPI_JVM_CLASS_COUNT", strconv.Itoa(jvmClassCount))
+			jvmClassCount, err := count.Classes(javaHome)
+			if err != nil {
+				return err
+			}
+			c.loadedClassCount = strconv.Itoa(jvmClassCount)
 		}
 	}
-
-	// 修正部分記憶體限制檔案位置不一致問題
-	var memoryLimitPathV2 string
-	memoryLimitPathV2, ok := os.LookupEnv("BPI_MEMORY_LIMIT_PATH_V2")
-	if !ok {
-		memoryLimitPathV2 = DefaultMemoryLimitPathV2Fix
+	if err = os.Setenv(envBpiJvmClassCount, c.loadedClassCount); err != nil {
+		return err
 	}
+	return nil
+}
 
+func run(c Config) (err error) {
+	if err = c.prepareLibJvmEnv(); err != nil {
+		return err
+	}
 	var (
 		l = bard.NewLogger(os.Stdout)
-
 		a = helper.ActiveProcessorCount{Logger: l}
 		j = helper.JavaOpts{Logger: l}
 		m = helper.MemoryCalculator{
 			Logger:            l,
 			MemoryLimitPathV1: helper.DefaultMemoryLimitPathV1,
-			MemoryLimitPathV2: memoryLimitPathV2,
+			MemoryLimitPathV2: c.memoryLimitPathV2,
 			MemoryInfoPath:    helper.DefaultMemoryInfoPath,
 		}
 	)
@@ -70,26 +162,28 @@ func main() {
 	for _, cmd := range cmds {
 		values, err := cmd.Execute()
 		if err != nil {
-			log.Fatal(err)
-		} else {
-			for k, v := range values {
-				v = strings.TrimSpace(v)
-				os.Setenv(k, v) // update golang environment variable
+			return err
+		}
+		for k, v := range values {
+			v = strings.TrimSpace(v)
+			if err = os.Setenv(k, v); err != nil { // update golang environment variable
+				return err
 			}
 		}
 	}
 
-	// 因為 Golang 無法直接對系統環境變數修改，所以需要輸出檔案
-	file, err := os.Create("/tmp/.env")
+	var javaToolOptions = os.Getenv(envJavaToolOptions)
+
+	if c.output == "" {
+		log.Printf("%v: %v\n", envJavaToolOptions, javaToolOptions)
+		return nil
+	}
+
+	file, err := os.Create(c.output)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer file.Close()
-
-	var javaToolOptions = os.Getenv("JAVA_TOOL_OPTIONS")
-	if _, err2 := file.WriteString(fmt.Sprintf("export JAVA_TOOL_OPTIONS='%s'\n", javaToolOptions)); err2 != nil {
-		log.Fatal(err2)
-	}
-
-	log.Printf("JAVA_TOOL_OPTIONS: %v\n", javaToolOptions)
+	_, err = file.WriteString(fmt.Sprintf("export %v='%s'\n", envJavaToolOptions, javaToolOptions))
+	return err
 }

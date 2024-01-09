@@ -11,6 +11,20 @@
 
 ## 配置項目：
 
+本套件優先餐數 arguments 傳入參數, 若沒有傳入則 fallback 到 OS Variable
+
+### Arguments 傳入
+
+- `--head-room`: 記憶體計算工具分配的預留空間百分比
+- `--loaded-class-count`: 運行時將加載的類的數量
+- `--thread-count`: 運行時的用戶線程數
+- `--application-path`: the directory on the container where the app's contents are placed (default "/app")
+- `--jvm-options`: vm options, typically JAVA_TOOL_OPTIONS
+- `-o, --output`: write to a file, instead of STDOUT
+- `-h, --help`: help for memory-calculator
+
+### OS Variable 設定方式
+
 - `$BPL_JVM_HEAD_ROOM`：記憶體計算工具分配的預留空間百分比，預設為 `0`。
 - `$BPL_JVM_LOADED_CLASS_COUNT`：運行時將加載的類的數量，預設為總類數的35%。
 - `$BPL_JVM_THREAD_COUNT`：運行時的用戶線程數，預設為 `200`。

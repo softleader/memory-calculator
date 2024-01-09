@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-/tmp/memory-calculator
+/tmp/memory-calculator -o /tmp/.env
 
 if [ -f "/tmp/.env" ]; then
   source /tmp/.env
