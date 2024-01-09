@@ -28,3 +28,5 @@ jobs:
           ldflags: -X main.version=${{ github.event.release.tag_name }}
           binary_name: memory-calculator
           extra_files: entrypoint.sh
+          asset_name: ${{ matrix.goos }}-${{ matrix.goarch }}
+          compress_assets: zip
