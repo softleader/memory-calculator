@@ -23,8 +23,8 @@ const (
 	envBpiMemoryLimitPathV2     = "BPI_MEMORY_LIMIT_PATH_V2"
 	defaultMemoryLimitPathV2Fix = "/sys/fs/cgroup/memory/memory.max_usage_in_bytes"
 	defaultJvmOptions           = ""
-	defaultHeadRoom             = "0"
-	defaultThreadCount          = "200"
+	defaultHeadRoom             = 0
+	defaultThreadCount          = 200
 	defaultApplicationPath      = "/app"
 	desc                        = `This command calculate the JVM memory for applications to run smoothly and stay within the memory limits of the container.
 In order to perform this calculation, the Memory Calculator requires the following input:
@@ -44,9 +44,9 @@ Examples:
 
 type Config struct {
 	jvmOptions        string
-	headRoom          string
-	threadCount       string
-	loadedClassCount  string
+	headRoom          int
+	threadCount       int
+	loadedClassCount  int
 	applicationPath   string
 	memoryLimitPathV2 string
 	output            string
@@ -65,9 +65,9 @@ func main() {
 	}
 	flags := cmd.Flags()
 	flags.StringVar(&c.jvmOptions, "jvm-options", c.jvmOptions, "vm options, typically JAVA_TOOL_OPTIONS")
-	flags.StringVar(&c.headRoom, "head-room", c.headRoom, "percentage of total memory available which will be left unallocated to cover JVM overhead")
-	flags.StringVar(&c.threadCount, "thread-count", c.threadCount, "the number of user threads")
-	flags.StringVar(&c.loadedClassCount, "loaded-class-count", c.loadedClassCount, "the number of classes that will be loaded when the application is running")
+	flags.IntVar(&c.headRoom, "head-room", c.headRoom, "percentage of total memory available which will be left unallocated to cover JVM overhead")
+	flags.IntVar(&c.threadCount, "thread-count", c.threadCount, "the number of user threads")
+	flags.IntVar(&c.loadedClassCount, "loaded-class-count", c.loadedClassCount, "the number of classes that will be loaded when the application is running")
 	flags.StringVar(&c.applicationPath, "application-path", c.applicationPath, "the directory on the container where the app's contents are placed")
 	flags.StringVarP(&c.output, "output", "o", c.output, "write to a file, instead of STDOUT")
 	if err := cmd.Execute(); err != nil {
@@ -86,16 +86,16 @@ func newConfig() Config {
 		c.jvmOptions = val
 	}
 	if val, ok := os.LookupEnv(envBplJvmHeadRoom); ok {
-		c.headRoom = val
+		c.headRoom, _ = strconv.Atoi(val)
 	}
 	if val, ok := os.LookupEnv(envBplJvmThreadCount); ok {
-		c.threadCount = val
+		c.threadCount, _ = strconv.Atoi(val)
 	}
 	if val, ok := os.LookupEnv(envBpiApplicationPath); ok {
 		c.applicationPath = val
 	}
 	if val, ok := os.LookupEnv(envBpiJvmClassCount); ok {
-		c.loadedClassCount = val
+		c.loadedClassCount, _ = strconv.Atoi(val)
 	}
 	// 修正部分記憶體限制檔案位置不一致問題
 	var ok bool
@@ -109,17 +109,17 @@ func (c *Config) prepareLibJvmEnv() (err error) {
 	if err = os.Setenv(envBplJvmThreadCount, c.jvmOptions); err != nil {
 		return err
 	}
-	if err = os.Setenv(envBplJvmHeadRoom, c.headRoom); err != nil {
+	if err = os.Setenv(envBplJvmHeadRoom, strconv.Itoa(c.headRoom)); err != nil {
 		return err
 	}
-	if err = os.Setenv(envBplJvmThreadCount, c.threadCount); err != nil {
+	if err = os.Setenv(envBplJvmThreadCount, strconv.Itoa(c.threadCount)); err != nil {
 		return err
 	}
 	if err = os.Setenv(envBpiApplicationPath, c.applicationPath); err != nil {
 		return err
 	}
 	// 計算JVM本身的Class數量
-	if c.loadedClassCount == "" {
+	if c.loadedClassCount == 0 {
 		if javaHome, ok := os.LookupEnv(envJavaHome); !ok {
 			return fmt.Errorf("failed to lookup %v env", envJavaHome)
 		} else {
@@ -127,10 +127,10 @@ func (c *Config) prepareLibJvmEnv() (err error) {
 			if err != nil {
 				return err
 			}
-			c.loadedClassCount = strconv.Itoa(jvmClassCount)
+			c.loadedClassCount = jvmClassCount
 		}
 	}
-	if err = os.Setenv(envBpiJvmClassCount, c.loadedClassCount); err != nil {
+	if err = os.Setenv(envBpiJvmClassCount, strconv.Itoa(c.loadedClassCount)); err != nil {
 		return err
 	}
 	return nil
