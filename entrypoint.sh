@@ -17,6 +17,7 @@ $BIN/memory-calculator -o $TMP_ENV
 
 if [ -f "$TMP_ENV" ]; then
   source $TMP_ENV
+  java -cp $( cat /app/jib-classpath-file ) $( cat /app/jib-main-class-file )
+else
+  java $JAVA_OPTS -cp $( cat /app/jib-classpath-file ) $( cat /app/jib-main-class-file )
 fi
-
-java $JAVA_OPTS -cp $(cat /app/jib-classpath-file) $(cat /app/jib-main-class-file)
