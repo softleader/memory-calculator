@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-GOOS="linux" go build -ldflags='-s -w' -o bin/memory_calculator
+GOOS="linux" go build -ldflags='-s -w' -o bin/memory-calculator
