@@ -191,7 +191,12 @@ func run(c Config) (err error) {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Printf("failed to close file %v: %v\n", file.Name(), err)
+		}
+	}(file)
 	_, err = file.WriteString(fmt.Sprintf("export %v='%s'\n", envJavaToolOptions, javaToolOptions))
 	return err
 }
