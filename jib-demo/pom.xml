@@ -14,7 +14,7 @@
     <name>jib-demo</name>
     <description>jib-demo</description>
     <properties>
-        <container-base-image>harbor.softleader.com.tw/library/eclipse-temurin-alpine:17-jre-mc-taipei
+        <container-base-image>harbor.softleader.com.tw/library/eclipse-temurin-alpine:17-jre-taipei
         </container-base-image>
         <container-image-project>demo</container-image-project>
         <container-image-repository>harbor.softleader.com.tw</container-image-repository>
