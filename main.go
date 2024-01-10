@@ -27,18 +27,44 @@ const (
 	defaultThreadCount          = 200
 	defaultApplicationPath      = "/app"
 	desc                        = `This command calculate the JVM memory for applications to run smoothly and stay within the memory limits of the container.
-In order to perform this calculation, the Memory Calculator requires the following input:
+During the computation process, numerous parameters are required, which must be obtained in a specific order and logic. 
+The sequence and explanations of these parameters are as follows:
 
-  --loaded-class-count: the number of classes that will be loaded when the application is running
-  --thread-count: the number of user threads
-  --jvm-options: VM Options, typically JAVA_TOOL_OPTIONS
-  --head-room: percentage of total memory available which will be left unallocated to cover JVM overhead
-  --application-path: the directory on the container where the app's contents are placed
-  --output: write to a file, instead of STDOUT
+  1. Percentage of reserved space allocated by Memory Calculation tool:
+     - First, determine if '--head-room' is passed through args.
+     - If not, check the OS environment variable $BPL_JVM_HEAD_ROOM.
+     - If neither is available, the default value is 0.
+  
+  2. Number of classes loaded at runtime:
+     - First, determine if '--loaded-class-count' is passed through args.
+     - If not, check the OS environment variable $BPL_JVM_LOADED_CLASS_COUNT.
+     - If neither is available, dynamically calculate 35% of the total number of classes in the App directory.
+  
+  3. Number of user threads at runtime:
+     - First, determine if '--thread-count' is passed through args.
+     - If not, check the OS environment variable $BPL_JVM_THREAD_COUNT.
+     - If neither is available, the default value is 200.
+  
+  4. App directory:
+     - First, determine if '--application-path' is passed through args.
+     - If not, the default directory is /app.
+  
+  5. VM creation parameters:
+     - First, determine if '--jvm-options' is passed through args.
+     - If not, check the OS environment variable $JAVA_TOOL_OPTIONS.
+  
+  6. Java startup parameters:
+     - Only check the OS environment variable $JAVA_OPTS.
+  
+  7. Java home:
+     - Only check the OS environment variable $JAVA_HOME.
 
 Examples:
   # Use ZGC and output to /tmp/.env 
   memory-calculator --jvm-options '-XX:+UseZGC' -o '/tmp/.env'
+
+  # Print the version and exit
+  memory-calculator --version
 `
 )
 
