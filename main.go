@@ -42,7 +42,7 @@ Examples:
 `
 )
 
-var Version = "<unknown>"
+var version = "<unknown>"
 
 type Config struct {
 	jvmOptions        string
@@ -64,7 +64,7 @@ func main() {
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if c.version {
-				fmt.Println(Version)
+				fmt.Println(version)
 				return nil
 			}
 			return run(c)
