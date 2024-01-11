@@ -57,7 +57,7 @@ Non-Heap = Direct Memory + Metaspace + Reserved Code Cache + (Thread Stack * Thr
 
 ## Entrypoint
 
-[`entrypoint.sh`](./entrypoint.sh) 是一個專為使用 [Jib](https://github.com/GoogleContainerTools/jib) 打包的 Image 而設計的入口 Shell ＳScript，它在執行時會根據前面提到的[計算演算法](#calculation-algorithm)來計算出建議的記憶體配置，然後啟動 Java 應用程式。
+[`entrypoint.sh`](./entrypoint.sh) 是一個專為使用 [Jib](https://github.com/GoogleContainerTools/jib) 打包的 Image 而設計的進入點，它在執行時會根據前面提到的[計算演算法](#calculation-algorithm)來計算出建議的記憶體配置，然後啟動 Java 應用程式。
 
 使用 `entrypoint.sh` 的步驟如下：
 
