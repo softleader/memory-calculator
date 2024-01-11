@@ -29,3 +29,7 @@
 2. 自定義入口點為 `/tmp/entrypoint.sh`。
 3. 避免使用 `jvmFlags`，改用 `JAVA_OPTS` 環境變數。
 4. 執行 `memory-calculator --help` 閱讀完整說明
+
+## Reference
+
+- [Java Buildpack - Memory Calculator](https://paketo.io/docs/reference/java-reference/#memory-calculator)
