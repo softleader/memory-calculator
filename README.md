@@ -63,7 +63,8 @@ Non-Heap = Direct Memory + Metaspace + Reserved Code Cache + (Thread Stack * Thr
 
 1. 將 `entrypoint.sh` 放入 Jib 所使用的 Base Image 中，例如放在 `/tmp` 資料夾下。
 2. 在 Jib 的配置中，將 entrypoint 設定為 `/tmp/entrypoint.sh`。
-3. 在 Jib 的配置中，建議避免使用 `jvmFlags`，而是使用 `JAVA_OPTS` 環境變數。
+
+在 Jib 中若[自定義了 entrypoint](https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#custom-container-entrypoint)，`<jvmFlags>` 參數將無法被直接引用。因此，`entrypoint.sh` 還整合了公司開發的 [jib-jvm-flags-extension-maven](https://github.com/softleader/jib-jvm-flags-extension-maven)。藉由這個 Jib Extension，我們就可以繼續使用 `<jvmFlags>`。
 
 ## 開發前準備
 

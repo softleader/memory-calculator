@@ -15,9 +15,16 @@ TMP_ENV="/tmp/.env"
 
 $BIN/memory-calculator -o $TMP_ENV
 
+# 檢查 /app/jib-jvm-flags-file 是否存在
+if [ -f /app/jib-jvm-flags-file ]; then
+    JVM_FLAGS=$(cat /app/jib-jvm-flags-file)
+else
+    JVM_FLAGS=""
+fi
+
 if [ -f "$TMP_ENV" ]; then
   source $TMP_ENV
-  exec java -cp $( cat /app/jib-classpath-file ) $( cat /app/jib-main-class-file )
+  exec java $JVM_FLAGS -cp $( cat /app/jib-classpath-file ) $( cat /app/jib-main-class-file )
 else
-  exec java $JAVA_OPTS -cp $( cat /app/jib-classpath-file ) $( cat /app/jib-main-class-file )
+  exec java $JVM_FLAGS $JAVA_OPTS -cp $( cat /app/jib-classpath-file ) $( cat /app/jib-main-class-file )
 fi
