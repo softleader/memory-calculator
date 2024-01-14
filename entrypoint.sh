@@ -6,7 +6,6 @@ TMP_ENV="/tmp/.env"
 JIB_CLASSPATH_FILE="/app/jib-classpath-file"
 JIB_MAIN_CLASS_FILE="/app/jib-main-class-file"
 JIB_JVM_FLAGS_FILE="/app/jib-jvm-flags-file"
-
 DEBUG=${DEBUG:-false}
 
 get_memory_calculator_bin() {
