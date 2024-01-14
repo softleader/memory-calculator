@@ -66,6 +66,14 @@ Non-Heap = Direct Memory + Metaspace + Reserved Code Cache + (Thread Stack * Thr
 
 在 Jib 中若[自定義了 entrypoint](https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#custom-container-entrypoint)，`<jvmFlags>` 參數將無法被直接引用。因此，`entrypoint.sh` 還整合了公司開發的 [jib-jvm-flags-extension-maven](https://github.com/softleader/jib-jvm-flags-extension-maven)。藉由這個 Jib Extension，我們就可以繼續使用 `<jvmFlags>`。
 
+
+### 支援的參數
+
+`entrypoint.sh` 支援以下作業系統環境變數：
+
+- `MEMORY_CALCULATOR_HOME`：用於設定執行檔的目錄，預設值為: `/usr/local/bin`。
+- `DEBUG`：除錯模式，若此值設為 `true`，則會列印出啟動 Java 應用程式的完整指令。
+
 ## 開發前準備
 
 - Golang: v1.20+
