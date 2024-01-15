@@ -23,7 +23,7 @@
     <container-image-repository>harbor.softleader.com.tw</container-image-repository>
     <java.version>17</java.version>
     <jib-maven-plugin.version>3.4.0</jib-maven-plugin.version>
-    <jib-jvm-flags-extension-maven.version>1.0.2</jib-jvm-flags-extension-maven.version>
+    <jib-jvm-flags-extension-maven.version>1.0.3</jib-jvm-flags-extension-maven.version>
   </properties>
   <dependencies>
     <dependency>
