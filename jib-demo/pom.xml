@@ -16,7 +16,7 @@
   <properties>
     <!--
       1. 需要先到上一層目錄中，執行: docker build -t jib-demo .
-      2. 再回到這層目錄, 執行: mvn jib:dockerBuild
+      2. 再回到這層目錄，執行: mvn jib:dockerBuild
     -->
     <container-base-image>docker://jib-demo</container-base-image>
     <container-image-project>demo</container-image-project>
@@ -69,7 +69,8 @@
               <jvmFlag>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005</jvmFlag>
             </jvmFlags>
             <args>
-              <arg>-Xdebug</arg>
+              <arg>some</arg>
+              <arg>args</arg>
             </args>
             <ports>
               <port>8080</port>

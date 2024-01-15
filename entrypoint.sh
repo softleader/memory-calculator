@@ -23,9 +23,9 @@ execute_java_app() {
 
   if [ -f "$TMP_ENV" ]; then
     source "$TMP_ENV"
-    exec java $jvm_flags $args -cp $(cat "$JIB_CLASSPATH_FILE") $(cat "$JIB_MAIN_CLASS_FILE")
+    exec java $jvm_flags -cp $(cat "$JIB_CLASSPATH_FILE") $(cat "$JIB_MAIN_CLASS_FILE") $args
   else
-    exec java $jvm_flags $args $JAVA_OPTS -cp $(cat "$JIB_CLASSPATH_FILE") $(cat "$JIB_MAIN_CLASS_FILE")
+    exec java $jvm_flags $JAVA_OPTS -cp $(cat "$JIB_CLASSPATH_FILE") $(cat "$JIB_MAIN_CLASS_FILE") $args
   fi
 
   [ "$DEBUG" = true ] && set +x
