@@ -36,6 +36,6 @@ BIN="${MEMORY_CALCULATOR_HOME:-$DEFAULT_BIN_PATH}"
 JVM_FLAGS=$(read_jvm_flags)
 ARGS="$@"
 
-$BIN/memory-calculator -o "$TMP_ENV" || { echo "Memory calculator failed"; exit 1; }
+$BIN/memory-calculator -o="$TMP_ENV" -v="$DEBUG" || { echo "Memory calculator failed"; exit 1; }
 
 execute_java_app "$JVM_FLAGS" "$ARGS"
