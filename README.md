@@ -1,6 +1,6 @@
 # 記憶體計算工具（Memory Calculator）
 
-** 記憶體計算工具 ** 是為了協助 Java
+**記憶體計算工具** 是為了協助 Java
 虛擬機（JVM）在運行時計算記憶體設定而開發的工具，基於 [paketo-buildpacks/libjvm](https://github.com/paketo-buildpacks/libjvm/)。
 
 ## Calculation Algorithm
@@ -77,7 +77,7 @@ memory-calculator -h
 `entrypoint.sh` 支援以下作業系統環境變數：
 
 - `MEMORY_CALCULATOR_HOME`：用於設定執行檔的目錄，預設值為: `/usr/local/bin`。
-- `DEBUG`：除錯模式，若此值設為 `true`，則會列印出啟動 Java 應用程式的完整指令。
+- `DEBUG`：除錯模式，若此值設為 `true`，則會列印出計算過程中除錯訊息，及啟動 Java 應用程式的完整指令。
 
 ## 開發前準備
 
