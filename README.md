@@ -1,6 +1,6 @@
 # 記憶體計算工具（Memory Calculator）
 
-**記憶體計算工具**是為了協助 Java
+** 記憶體計算工具 ** 是為了協助 Java
 虛擬機（JVM）在運行時計算記憶體設定而開發的工具，基於 [paketo-buildpacks/libjvm](https://github.com/paketo-buildpacks/libjvm/)。
 
 ## Calculation Algorithm
@@ -43,29 +43,34 @@ Non-Heap = Direct Memory + Metaspace + Reserved Code Cache + (Thread Stack * Thr
 
 ## Input Variables
 
-在計算過程中, 需要依照特定的順序和邏輯使用多個參數, 以下是參數的取得順序及其說明：
+在計算過程中，需要依照特定的順序和邏輯使用多個參數，以下是參數的取得順序及其說明：
 
 | 參數說明 | 優先判斷 args 傳入  | 其次判斷 OS Variable | 最後的預設值或行為 |
 |---|---|---|---|
 | 記憶體計算工具分配的預留空間百分比 | `--head-room` | `$BPL_JVM_HEAD_ROOM` | `0` |
-| 運行時將加載的 class 數量 | `--loaded-class-count ` | `$BPL_JVM_LOADED_CLASS_COUNT ` | 動態計算 App 目錄下 class 總數量的 35% |
+| 運行時將加載的 class 數量 | `--loaded-class-count` | `$BPL_JVM_LOADED_CLASS_COUNT` | 動態計算 App 目錄下 class 總數量的 35% |
 | 運行時的用戶線程數 | `--thread-count` | `$BPL_JVM_THREAD_COUNT` | `200` |
 | App 目錄 | `--application-path` | | `/app` |
 | VM 建立參數 | `--jvm-options` | `$JAVA_TOOL_OPTIONS` | |
-| Java啟動參數 |   | `$JAVA_OPTS ` | |
+| Java 啟動參數 |   | `$JAVA_OPTS` | |
 | Java Home |   | `$JAVA_HOME ` | |
+
+執行以下指令以查看完整的 args 參數說明:
+
+```sh
+memory-calculator -h
+```
 
 ## Entrypoint
 
-[`entrypoint.sh`](./entrypoint.sh) 是一個專為使用 [Jib](https://github.com/GoogleContainerTools/jib) 打包的 Image 而設計的進入點，它在執行時會根據前面提到的[計算演算法](#calculation-algorithm)來計算出建議的記憶體配置，然後啟動 Java 應用程式。
+[`entrypoint.sh`](./entrypoint.sh) 是一個專為使用 [Jib](https://github.com/GoogleContainerTools/jib) 打包的 Image 而設計的進入點，它在執行時會根據前面提到的 [計算演算法](#calculation-algorithm) 來計算出建議的記憶體配置，然後啟動 Java 應用程式。
 
 使用 `entrypoint.sh` 的步驟如下：
 
 1. 將 `entrypoint.sh` 放入 Jib 所使用的 Base Image 中，例如放在 `/tmp` 資料夾下。
 2. 在 Jib 的配置中，將 entrypoint 設定為 `/tmp/entrypoint.sh`。
 
-在 Jib 中若[自定義了 entrypoint](https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#custom-container-entrypoint)，`<jvmFlags>` 參數將無法被直接引用。因此，`entrypoint.sh` 還整合了公司開發的 [jib-jvm-flags-extension-maven](https://github.com/softleader/jib-jvm-flags-extension-maven)。藉由這個 Jib Extension，我們就可以繼續使用 `<jvmFlags>`。
-
+在 Jib 中若 [自定義了 entrypoint](https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#custom-container-entrypoint)，`<jvmFlags>` 參數將無法被直接引用。因此，`entrypoint.sh` 還整合了公司開發的 [jib-jvm-flags-extension-maven](https://github.com/softleader/jib-jvm-flags-extension-maven)。藉由這個 Jib Extension，我們就可以繼續使用 `<jvmFlags>`。
 
 ### 支援的參數
 

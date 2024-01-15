@@ -7,60 +7,57 @@ import (
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/sherpa"
 	"github.com/spf13/cobra"
-	"log"
 	"os"
 	"strconv"
 	"strings"
 )
 
 const (
-	envJavaHome                 = "JAVA_HOME"
-	envJavaToolOptions          = "JAVA_TOOL_OPTIONS"
-	envBplJvmHeadRoom           = "BPL_JVM_HEAD_ROOM"
-	envBplJvmThreadCount        = "BPL_JVM_THREAD_COUNT"
-	envBpiApplicationPath       = "BPI_APPLICATION_PATH"
-	envBpiJvmClassCount         = "BPI_JVM_CLASS_COUNT"
-	envBpiMemoryLimitPathV2     = "BPI_MEMORY_LIMIT_PATH_V2"
-	defaultMemoryLimitPathV2Fix = "/sys/fs/cgroup/memory/memory.max_usage_in_bytes"
-	defaultJvmOptions           = ""
-	defaultHeadRoom             = 0
-	defaultThreadCount          = 200
-	defaultApplicationPath      = "/app"
-	desc                        = `This command calculate the JVM memory for applications to run smoothly and stay within the memory limits of the container.
-During the computation process, numerous parameters are required, which must be obtained in a specific order and logic. 
+	envJavaHome            = "JAVA_HOME"
+	envJavaToolOptions     = "JAVA_TOOL_OPTIONS"
+	envBplJvmHeadRoom      = "BPL_JVM_HEAD_ROOM"
+	envBplJvmThreadCount   = "BPL_JVM_THREAD_COUNT"
+	envBpiApplicationPath  = "BPI_APPLICATION_PATH"
+	envBpiJvmClassCount    = "BPI_JVM_CLASS_COUNT"
+	defaultJvmOptions      = ""
+	defaultHeadRoom        = helper.DefaultHeadroom
+	defaultThreadCount     = 200
+	defaultApplicationPath = "/app"
+	desc                   = `This command calculate the JVM memory for applications to run smoothly and stay within the memory limits of the container.
+During the computation process, numerous parameters are required, which must be obtained in a specific order and logic.
 The sequence and explanations of these parameters are as follows:
 
   1. Percentage of reserved space allocated by Memory Calculation tool:
      - First, determine if '--head-room' is passed through args.
      - If not, check the OS environment variable $BPL_JVM_HEAD_ROOM.
      - If neither is available, the default value is 0.
-  
+
   2. Number of classes loaded at runtime:
      - First, determine if '--loaded-class-count' is passed through args.
      - If not, check the OS environment variable $BPL_JVM_LOADED_CLASS_COUNT.
      - If neither is available, dynamically calculate 35% of the total number of classes in the App directory.
-  
+
   3. Number of user threads at runtime:
      - First, determine if '--thread-count' is passed through args.
      - If not, check the OS environment variable $BPL_JVM_THREAD_COUNT.
      - If neither is available, the default value is 200.
-  
+
   4. App directory:
      - First, determine if '--application-path' is passed through args.
      - If not, the default directory is /app.
-  
+
   5. VM creation parameters:
      - First, determine if '--jvm-options' is passed through args.
      - If not, check the OS environment variable $JAVA_TOOL_OPTIONS.
-  
+
   6. Java startup parameters:
      - Only check the OS environment variable $JAVA_OPTS.
-  
+
   7. Java home:
      - Only check the OS environment variable $JAVA_HOME.
 
 Examples:
-  # Use ZGC and output to /tmp/.env 
+  # Use ZGC and output to /tmp/.env
   memory-calculator --jvm-options '-XX:+UseZGC' -o '/tmp/.env'
 
   # Print the version and exit
@@ -79,6 +76,7 @@ type Config struct {
 	memoryLimitPathV2 string
 	output            string
 	version           bool
+	verbose           bool
 }
 
 func main() {
@@ -104,6 +102,7 @@ func main() {
 	flags.StringVar(&c.applicationPath, "application-path", c.applicationPath, "the directory on the container where the app's contents are placed")
 	flags.StringVarP(&c.output, "output", "o", c.output, "write to a file, instead of STDOUT")
 	flags.BoolVar(&c.version, "version", c.version, "print version and exit")
+	flags.BoolVarP(&c.verbose, "verbose", "v", c.verbose, "enable verbose output")
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
 	}
@@ -111,11 +110,10 @@ func main() {
 
 func newConfig() Config {
 	c := Config{
-		jvmOptions:        defaultJvmOptions,
-		headRoom:          defaultHeadRoom,
-		threadCount:       defaultThreadCount,
-		applicationPath:   defaultApplicationPath,
-		memoryLimitPathV2: defaultMemoryLimitPathV2Fix,
+		jvmOptions:      defaultJvmOptions,
+		headRoom:        defaultHeadRoom,
+		threadCount:     defaultThreadCount,
+		applicationPath: defaultApplicationPath,
 	}
 	if val, ok := os.LookupEnv(envJavaToolOptions); ok {
 		c.jvmOptions = val
@@ -132,11 +130,14 @@ func newConfig() Config {
 	if val, ok := os.LookupEnv(envBpiApplicationPath); ok {
 		c.applicationPath = val
 	}
-	// 修正部分記憶體限制檔案位置不一致問題
-	if val, ok := os.LookupEnv(envBpiMemoryLimitPathV2); ok {
-		c.memoryLimitPathV2 = val
-	}
 	return c
+}
+
+func (c *Config) newLogger() bard.Logger {
+	if c.verbose {
+		return bard.NewLoggerWithOptions(os.Stdout, bard.WithDebug(os.Stdout))
+	}
+	return bard.NewLogger(os.Stdout)
 }
 
 func (c *Config) prepareLibJvmEnv() (err error) {
@@ -175,13 +176,13 @@ func run(c Config) (err error) {
 		return err
 	}
 	var (
-		l = bard.NewLogger(os.Stdout)
+		l = c.newLogger()
 		a = helper.ActiveProcessorCount{Logger: l}
 		j = helper.JavaOpts{Logger: l}
 		m = helper.MemoryCalculator{
 			Logger:            l,
-			MemoryLimitPathV1: helper.DefaultMemoryLimitPathV1,
-			MemoryLimitPathV2: c.memoryLimitPathV2,
+			MemoryLimitPathV1: helper.DefaultMemoryLimitPathV1, // cgroup v1 的記憶體上限路徑
+			MemoryLimitPathV2: helper.DefaultMemoryLimitPathV2, // cgroup v2 的記憶體上限路徑
 			MemoryInfoPath:    helper.DefaultMemoryInfoPath,
 		}
 	)
@@ -209,7 +210,7 @@ func run(c Config) (err error) {
 	var javaToolOptions = os.Getenv(envJavaToolOptions)
 
 	if c.output == "" {
-		log.Printf("%v: %v\n", envJavaToolOptions, javaToolOptions)
+		l.Infof("%v: %v\n", envJavaToolOptions, javaToolOptions)
 		return nil
 	}
 
@@ -220,7 +221,7 @@ func run(c Config) (err error) {
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			log.Printf("failed to close file %v: %v\n", file.Name(), err)
+			l.Infof("WARNING: failed to close file %v: %v\n", file.Name(), err)
 		}
 	}(file)
 	_, err = file.WriteString(fmt.Sprintf("export %v='%s'\n", envJavaToolOptions, javaToolOptions))

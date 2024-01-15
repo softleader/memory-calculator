@@ -14,7 +14,11 @@
   <name>jib-demo</name>
   <description>jib-demo</description>
   <properties>
-    <container-base-image>harbor.softleader.com.tw/library/eclipse-temurin-alpine:17-jre-taipei</container-base-image>
+    <!--
+      1. 需要先到上一層目錄中，執行: docker build -t jib-demo .
+      2. 再回到這層目錄, 執行: mvn jib:dockerBuild
+    -->
+    <container-base-image>docker://jib-demo</container-base-image>
     <container-image-project>demo</container-image-project>
     <container-image-repository>harbor.softleader.com.tw</container-image-repository>
     <java.version>17</java.version>
