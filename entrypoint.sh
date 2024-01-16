@@ -16,7 +16,7 @@ read_jvm_flags() {
 }
 
 execute_memory_calculator() {
-  if [ "${MEM_CALC_OFF}" = "true" ]; then
+  if [ "${MEM_CALC_ENABLED}" = "false" ]; then
     return
   fi
 
