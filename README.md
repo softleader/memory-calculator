@@ -54,8 +54,8 @@ Non-Heap = Direct Memory + Metaspace + Reserved Code Cache + (Thread Stack * Thr
 | VM 建立參數 | `--jvm-options` | `$JAVA_TOOL_OPTIONS` | |
 | Java 啟動參數 |   | `$JAVA_OPTS` | |
 | Java Home |   | `$JAVA_HOME ` | |
-| 是否啟用 [Native Memory Tracking](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/tooldescr007.html) | `--enable-nmt` | `$BPL_JAVA_NMT_ENABLED` | `true` |
-| 是否啟用 [Java Flight Recorder](https://docs.oracle.com/javacomponents/jmc-5-4/jfr-runtime-guide/about.htm) | `--enable-jfr` | `$BPL_JFR_ENABLED` | `true` |
+| 是否啟用 [NMT](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/tooldescr007.html) | `--enable-nmt` | `$BPL_JAVA_NMT_ENABLED` | `true` |
+| 是否啟用 [JFR](https://docs.oracle.com/javacomponents/jmc-5-4/jfr-runtime-guide/about.htm) | `--enable-jfr` | `$BPL_JFR_ENABLED` | `true` |
 | 是否啟用 JMX | `--enable-jmx` | `$BPL_JMX_ENABLED` | `true` |
 
 執行以下指令以查看完整的 args 參數說明:
