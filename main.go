@@ -13,17 +13,17 @@ import (
 )
 
 const (
-	envJavaHome            = "JAVA_HOME"
-	envJavaToolOptions     = "JAVA_TOOL_OPTIONS"
-	envBplJvmHeadRoom      = "BPL_JVM_HEAD_ROOM"
-	envBplJvmThreadCount   = "BPL_JVM_THREAD_COUNT"
-	envBpiApplicationPath  = "BPI_APPLICATION_PATH"
-	envBpiJvmClassCount    = "BPI_JVM_CLASS_COUNT"
-	defaultJvmOptions      = ""
-	defaultHeadRoom        = helper.DefaultHeadroom
-	defaultThreadCount     = 200
-	defaultApplicationPath = "/app"
-	desc                   = `This command calculate the JVM memory for applications to run smoothly and stay within the memory limits of the container.
+	envJavaHome               = "JAVA_HOME"
+	envJavaToolOptions        = "JAVA_TOOL_OPTIONS"
+	envBplJvmHeadRoom         = "BPL_JVM_HEAD_ROOM"
+	envBplJvmThreadCount      = "BPL_JVM_THREAD_COUNT"
+	envBpiApplicationPath     = "BPI_APPLICATION_PATH"
+	envBpiJvmLoadedClassCount = "BPL_JVM_LOADED_CLASS_COUNT"
+	defaultJvmOptions         = ""
+	defaultHeadRoom           = helper.DefaultHeadroom
+	defaultThreadCount        = 200
+	defaultApplicationPath    = "/app"
+	desc                      = `This command calculate the JVM memory for applications to run smoothly and stay within the memory limits of the container.
 During the computation process, numerous parameters are required, which must be obtained in a specific order and logic.
 The sequence and explanations of these parameters are as follows:
 
@@ -124,7 +124,7 @@ func newConfig() Config {
 	if val, ok := os.LookupEnv(envBplJvmThreadCount); ok {
 		c.threadCount, _ = strconv.Atoi(val)
 	}
-	if val, ok := os.LookupEnv(envBpiJvmClassCount); ok {
+	if val, ok := os.LookupEnv(envBpiJvmLoadedClassCount); ok {
 		c.loadedClassCount, _ = strconv.Atoi(val)
 	}
 	if val, ok := os.LookupEnv(envBpiApplicationPath); ok {
@@ -165,7 +165,7 @@ func (c *Config) prepareLibJvmEnv() (err error) {
 			c.loadedClassCount = jvmClassCount
 		}
 	}
-	if err = os.Setenv(envBpiJvmClassCount, strconv.Itoa(c.loadedClassCount)); err != nil {
+	if err = os.Setenv(envBpiJvmLoadedClassCount, strconv.Itoa(c.loadedClassCount)); err != nil {
 		return err
 	}
 	return nil
