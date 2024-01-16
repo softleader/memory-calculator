@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/miekg/dns"
+	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libjvm/count"
 	"github.com/paketo-buildpacks/libjvm/helper"
 	"github.com/paketo-buildpacks/libpak/bard"
@@ -19,6 +21,8 @@ const (
 	envBplJvmThreadCount      = "BPL_JVM_THREAD_COUNT"
 	envBpiApplicationPath     = "BPI_APPLICATION_PATH"
 	envBpiJvmLoadedClassCount = "BPL_JVM_LOADED_CLASS_COUNT"
+	envBpiJvmCaCerts          = "BPI_JVM_CACERTS"
+	envBpLogLevel             = "BP_LOG_LEVEL"
 	defaultJvmOptions         = ""
 	defaultHeadRoom           = helper.DefaultHeadroom
 	defaultThreadCount        = 200
@@ -130,17 +134,16 @@ func newConfig() Config {
 	if val, ok := os.LookupEnv(envBpiApplicationPath); ok {
 		c.applicationPath = val
 	}
+	if val, ok := os.LookupEnv(envBpLogLevel); ok {
+		c.verbose = val == "DEBUG"
+	}
 	return c
 }
 
-func (c *Config) newLogger() bard.Logger {
-	if c.verbose {
-		return bard.NewLoggerWithOptions(os.Stdout, bard.WithDebug(os.Stdout))
-	}
-	return bard.NewLogger(os.Stdout)
-}
-
 func (c *Config) prepareLibJvmEnv() (err error) {
+	if c.verbose && os.Setenv(envBpLogLevel, "DEBUG") != nil {
+		return err
+	}
 	if err = os.Setenv(envBplJvmThreadCount, c.jvmOptions); err != nil {
 		return err
 	}
@@ -175,22 +178,9 @@ func run(c Config) (err error) {
 	if err = c.prepareLibJvmEnv(); err != nil {
 		return err
 	}
-	var (
-		l = c.newLogger()
-		a = helper.ActiveProcessorCount{Logger: l}
-		j = helper.JavaOpts{Logger: l}
-		m = helper.MemoryCalculator{
-			Logger:            l,
-			MemoryLimitPathV1: helper.DefaultMemoryLimitPathV1, // cgroup v1 的記憶體上限路徑
-			MemoryLimitPathV2: helper.DefaultMemoryLimitPathV2, // cgroup v2 的記憶體上限路徑
-			MemoryInfoPath:    helper.DefaultMemoryInfoPath,
-		}
-	)
-
-	cmds := map[string]sherpa.ExecD{
-		"active-processor-count": a,
-		"java-opts":              j,
-		"memory-calculator":      m,
+	cmds, err := buildCommands()
+	if err != nil {
+		return err
 	}
 
 	// 依序執行 helper
@@ -208,22 +198,82 @@ func run(c Config) (err error) {
 	}
 
 	var javaToolOptions = os.Getenv(envJavaToolOptions)
-
 	if c.output == "" {
-		l.Infof("%v: %v\n", envJavaToolOptions, javaToolOptions)
+		fmt.Printf("%v: %v\n", envJavaToolOptions, javaToolOptions)
 		return nil
 	}
+	return writeFile(c.output, javaToolOptions)
+}
 
-	file, err := os.Create(c.output)
+// 這邊基本上是從 libjvm@v1.44.0 cmd/helper/main.go 複製過來
+// https://github.com/paketo-buildpacks/libjvm/blob/main/cmd/helper/main.go
+func buildCommands() (cmds map[string]sherpa.ExecD, err error) {
+	var (
+		l  = bard.NewLogger(os.Stdout)
+		cl = libjvm.NewCertificateLoader()
+
+		a   = helper.ActiveProcessorCount{Logger: l}
+		spc = helper.SecurityProvidersConfigurer{Logger: l}
+		d   = helper.LinkLocalDNS{Logger: l}
+		j   = helper.JavaOpts{Logger: l}
+		jh  = helper.JVMHeapDump{Logger: l}
+		m   = helper.MemoryCalculator{
+			Logger:            l,
+			MemoryLimitPathV1: helper.DefaultMemoryLimitPathV1, // cgroup v1 的記憶體上限路徑
+			MemoryLimitPathV2: helper.DefaultMemoryLimitPathV2, // cgroup v2 的記憶體上限路徑
+			MemoryInfoPath:    helper.DefaultMemoryInfoPath,
+		}
+		o  = helper.OpenSSLCertificateLoader{CertificateLoader: cl, Logger: l}
+		s8 = helper.SecurityProvidersClasspath8{Logger: l}
+		s9 = helper.SecurityProvidersClasspath9{Logger: l}
+		d8 = helper.Debug8{Logger: l}
+		d9 = helper.Debug9{Logger: l}
+		jm = helper.JMX{Logger: l}
+		n  = helper.NMT{Logger: l}
+		jf = helper.JFR{Logger: l}
+	)
+
+	file := "/etc/resolv.conf"
+	d.Config, err = dns.ClientConfigFromFile(file)
+	if err != nil {
+		return nil, fmt.Errorf("unable to read DNS client configuration from %s\n%w", file, err)
+	}
+
+	cmds = map[string]sherpa.ExecD{
+		"active-processor-count":         a,
+		"java-opts":                      j,
+		"jvm-heap":                       jh,
+		"link-local-dns":                 d,
+		"memory-calculator":              m,
+		"openssl-certificate-loader":     o,
+		"security-providers-classpath-8": s8,
+		"security-providers-classpath-9": s9,
+		"security-providers-configurer":  spc,
+		"debug-8":                        d8,
+		"debug-9":                        d9,
+		"jmx":                            jm,
+		"nmt":                            n,
+		"jfr":                            jf,
+	}
+
+	if _, ok := os.LookupEnv(envBpiJvmCaCerts); !ok {
+		delete(cmds, "openssl-certificate-loader")
+	}
+
+	return cmds, nil
+}
+
+func writeFile(file string, content string) (err error) {
+	out, err := os.Create(file)
 	if err != nil {
 		return err
 	}
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			l.Infof("WARNING: failed to close file %v: %v\n", file.Name(), err)
+			fmt.Printf("WARNING: failed to close file %v: %v\n", file.Name(), err)
 		}
-	}(file)
-	_, err = file.WriteString(fmt.Sprintf("export %v='%s'\n", envJavaToolOptions, javaToolOptions))
+	}(out)
+	_, err = out.WriteString(fmt.Sprintf("export %v='%s'\n", envJavaToolOptions, content))
 	return err
 }
