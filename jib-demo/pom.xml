@@ -28,9 +28,14 @@
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
+      <artifactId>spring-boot-starter</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <optional>true</optional>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
@@ -63,10 +68,7 @@
             <jvmFlags>
               <jvmFlag>-server</jvmFlag>
               <jvmFlag>-XX:+UseZGC</jvmFlag>
-              <jvmFlag>-Dfile.encoding=UTF-8</jvmFlag>
-              <jvmFlag>-Djava.net.preferIPv4Stack=true</jvmFlag>
-              <jvmFlag>-XshowSettings:vm</jvmFlag>
-              <jvmFlag>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005</jvmFlag>
+              <jvmFlag>-Dmy</jvmFlag>
             </jvmFlags>
             <args>
               <arg>some</arg>
