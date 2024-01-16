@@ -16,6 +16,10 @@ read_jvm_flags() {
 }
 
 execute_memory_calculator() {
+  if [ "${MEM_CALC_OFF}" = "true" ]; then
+    return
+  fi
+
   local bin_path=$1
   local debug=$2
   $bin_path/memory-calculator -o="$TMP_ENV" -v="$debug" || { echo "Memory calculator failed"; exit 1; }
@@ -33,7 +37,7 @@ execute_java_app() {
 }
 
 DEBUG="${DEBUG:-false}"
-BIN="${MEMORY_CALCULATOR_HOME:-$DEFAULT_BIN_PATH}"
+BIN="${MEM_CALC_HOME:-$DEFAULT_BIN_PATH}"
 JVM_FLAGS=$(read_jvm_flags)
 ARGS="$@"
 

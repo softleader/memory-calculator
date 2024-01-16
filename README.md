@@ -50,10 +50,13 @@ Non-Heap = Direct Memory + Metaspace + Reserved Code Cache + (Thread Stack * Thr
 | 記憶體計算工具分配的預留空間百分比 | `--head-room` | `$BPL_JVM_HEAD_ROOM` | `0` |
 | 運行時將加載的 class 數量 | `--loaded-class-count` | `$BPL_JVM_LOADED_CLASS_COUNT` | 動態計算全部 class 總數量的 35%, 包含 App 目錄下及 JVM 中的 class 等 |
 | 運行時的用戶線程數 | `--thread-count` | `$BPL_JVM_THREAD_COUNT` | `200` |
-| App 目錄 | `--application-path` | | `/app` |
+| App 目錄 | `--app-path` | | `/app` |
 | VM 建立參數 | `--jvm-options` | `$JAVA_TOOL_OPTIONS` | |
 | Java 啟動參數 |   | `$JAVA_OPTS` | |
 | Java Home |   | `$JAVA_HOME ` | |
+| 是否啟用 [Native Memory Tracking](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/tooldescr007.html) | `--enable-nmt` | `$BPL_JAVA_NMT_ENABLED` | `true` |
+| 是否啟用 [Java Flight Recorder](https://docs.oracle.com/javacomponents/jmc-5-4/jfr-runtime-guide/about.htm) | `--enable-jfr` | `$BPL_JFR_ENABLED` | `true` |
+| 是否啟用 JMX | `--enable-jmx` | `$BPL_JMX_ENABLED` | `true` |
 
 執行以下指令以查看完整的 args 參數說明:
 
@@ -76,7 +79,8 @@ memory-calculator -h
 
 `entrypoint.sh` 支援以下作業系統環境變數：
 
-- `MEMORY_CALCULATOR_HOME`：用於設定執行檔的目錄，預設值為: `/usr/local/bin`。
+- `MEM_CALC_HOME`：用於設定執行檔的目錄，預設值為: `/usr/local/bin`。
+- `MEM_CALC_OFF`：若此值設為 `true`，則會跳過記憶體計算，直接啟動 Java 應用程式。
 - `DEBUG`：除錯模式，若此值設為 `true`，則會列印出計算過程中除錯訊息，及啟動 Java 應用程式的完整指令。
 
 ## 開發前準備

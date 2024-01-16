@@ -22,11 +22,14 @@ const (
 	envBpiApplicationPath     = "BPI_APPLICATION_PATH"
 	envBpiJvmLoadedClassCount = "BPL_JVM_LOADED_CLASS_COUNT"
 	envBpiJvmCaCerts          = "BPI_JVM_CACERTS"
+	envBplJavaNmtEnabled      = "BPL_JAVA_NMT_ENABLED"
+	envBplJfrEnabled          = "BPL_JFR_ENABLED"
+	envBplJmxEnabled          = "BPL_JMX_ENABLED"
 	envBpLogLevel             = "BP_LOG_LEVEL"
 	defaultJvmOptions         = ""
 	defaultHeadRoom           = helper.DefaultHeadroom
 	defaultThreadCount        = 200
-	defaultApplicationPath    = "/app"
+	defaultAppPath            = "/app"
 	desc                      = `This command calculate the JVM memory for applications to run smoothly and stay within the memory limits of the container.
 During the computation process, numerous parameters are required, which must be obtained in a specific order and logic.
 The sequence and explanations of these parameters are as follows:
@@ -47,7 +50,7 @@ The sequence and explanations of these parameters are as follows:
      - If neither is available, the default value is 200.
 
   4. App directory:
-     - First, determine if '--application-path' is passed through args.
+     - First, determine if '--app-path' is passed through args.
      - If not, the default directory is /app.
 
   5. VM creation parameters:
@@ -69,18 +72,24 @@ Examples:
 `
 )
 
-var version = "<unknown>"
+var (
+	version               = "<unknown>"
+	staticJavaToolOptions = []string{"-XX:+ExitOnOutOfMemoryError"} // 固定要加上的參數
+)
 
 type Config struct {
 	jvmOptions        string
 	headRoom          int
 	threadCount       int
 	loadedClassCount  int
-	applicationPath   string
+	appPath           string
 	memoryLimitPathV2 string
 	output            string
 	version           bool
 	verbose           bool
+	enabledNmt        bool
+	enableJfr         bool
+	enableJmx         bool
 }
 
 func main() {
@@ -102,11 +111,14 @@ func main() {
 	flags.StringVar(&c.jvmOptions, "jvm-options", c.jvmOptions, "vm options, typically JAVA_TOOL_OPTIONS")
 	flags.IntVar(&c.headRoom, "head-room", c.headRoom, "percentage of total memory available which will be left unallocated to cover JVM overhead")
 	flags.IntVar(&c.threadCount, "thread-count", c.threadCount, "the number of user threads")
-	flags.IntVar(&c.loadedClassCount, "loaded-class-count", c.loadedClassCount, "the number of classes that will be loaded when the application is running")
-	flags.StringVar(&c.applicationPath, "application-path", c.applicationPath, "the directory on the container where the app's contents are placed")
+	flags.IntVar(&c.loadedClassCount, "loaded-class-count", c.loadedClassCount, "the number of classes that will be loaded when the app is running")
+	flags.StringVar(&c.appPath, "app-path", c.appPath, "the directory on the container where the app's contents are placed")
 	flags.StringVarP(&c.output, "output", "o", c.output, "write to a file, instead of STDOUT")
 	flags.BoolVar(&c.version, "version", c.version, "print version and exit")
 	flags.BoolVarP(&c.verbose, "verbose", "v", c.verbose, "enable verbose output")
+	flags.BoolVar(&c.enabledNmt, "enable-nmt", c.version, "enable Native Memory Tracking (NMT)")
+	flags.BoolVar(&c.enableJfr, "enable-jfr", c.version, "enable Java Flight Recorder (JFR)")
+	flags.BoolVar(&c.enableJmx, "enable-jmx", c.version, "enable Java Management Extensions (JMX)")
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
 	}
@@ -114,10 +126,13 @@ func main() {
 
 func newConfig() Config {
 	c := Config{
-		jvmOptions:      defaultJvmOptions,
-		headRoom:        defaultHeadRoom,
-		threadCount:     defaultThreadCount,
-		applicationPath: defaultApplicationPath,
+		jvmOptions:  defaultJvmOptions,
+		headRoom:    defaultHeadRoom,
+		threadCount: defaultThreadCount,
+		appPath:     defaultAppPath,
+		enabledNmt:  true,
+		enableJfr:   true,
+		enableJmx:   true,
 	}
 	if val, ok := os.LookupEnv(envJavaToolOptions); ok {
 		c.jvmOptions = val
@@ -132,10 +147,19 @@ func newConfig() Config {
 		c.loadedClassCount, _ = strconv.Atoi(val)
 	}
 	if val, ok := os.LookupEnv(envBpiApplicationPath); ok {
-		c.applicationPath = val
+		c.appPath = val
 	}
 	if val, ok := os.LookupEnv(envBpLogLevel); ok {
 		c.verbose = val == "DEBUG"
+	}
+	if val, ok := os.LookupEnv(envBplJavaNmtEnabled); ok {
+		c.enabledNmt = val == "true"
+	}
+	if val, ok := os.LookupEnv(envBplJfrEnabled); ok {
+		c.enableJfr = val == "true"
+	}
+	if val, ok := os.LookupEnv(envBplJmxEnabled); ok {
+		c.enableJmx = val == "true"
 	}
 	return c
 }
@@ -153,7 +177,16 @@ func (c *Config) prepareLibJvmEnv() (err error) {
 	if err = os.Setenv(envBplJvmThreadCount, strconv.Itoa(c.threadCount)); err != nil {
 		return err
 	}
-	if err = os.Setenv(envBpiApplicationPath, c.applicationPath); err != nil {
+	if err = os.Setenv(envBpiApplicationPath, c.appPath); err != nil {
+		return err
+	}
+	if err = os.Setenv(envBplJavaNmtEnabled, strconv.FormatBool(c.enabledNmt)); err != nil {
+		return err
+	}
+	if err = os.Setenv(envBplJfrEnabled, strconv.FormatBool(c.enableJfr)); err != nil {
+		return err
+	}
+	if err = os.Setenv(envBplJmxEnabled, strconv.FormatBool(c.enableJmx)); err != nil {
 		return err
 	}
 	// 計算JVM本身的Class數量
@@ -197,12 +230,22 @@ func run(c Config) (err error) {
 		}
 	}
 
-	var javaToolOptions = os.Getenv(envJavaToolOptions)
+	javaToolOptions := getJavaToolOptions()
 	if c.output == "" {
 		fmt.Printf("%v: %v\n", envJavaToolOptions, javaToolOptions)
 		return nil
 	}
 	return writeFile(c.output, javaToolOptions)
+}
+
+func getJavaToolOptions() string {
+	var javaToolOptions = os.Getenv(envJavaToolOptions)
+	for _, option := range staticJavaToolOptions {
+		if !strings.Contains(javaToolOptions, option) {
+			javaToolOptions += " " + option
+		}
+	}
+	return javaToolOptions
 }
 
 // 這邊基本上是從 libjvm@v1.44.0 cmd/helper/main.go 複製過來
@@ -252,7 +295,7 @@ func buildCommands() (cmds map[string]sherpa.ExecD, err error) {
 		"debug-8":                        d8,
 		"debug-9":                        d9,
 		"jmx":                            jm,
-		"nmt":                            n,
+		"enabledNmt":                     n,
 		"jfr":                            jf,
 	}
 
