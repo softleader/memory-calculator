@@ -116,9 +116,9 @@ func main() {
 	flags.StringVarP(&c.output, "output", "o", c.output, "write to a file, instead of STDOUT")
 	flags.BoolVar(&c.version, "version", c.version, "print version and exit")
 	flags.BoolVarP(&c.verbose, "verbose", "v", c.verbose, "enable verbose output")
-	flags.BoolVar(&c.enabledNmt, "enable-nmt", c.version, "enable Native Memory Tracking (NMT)")
-	flags.BoolVar(&c.enableJfr, "enable-jfr", c.version, "enable Java Flight Recorder (JFR)")
-	flags.BoolVar(&c.enableJmx, "enable-jmx", c.version, "enable Java Management Extensions (JMX)")
+	flags.BoolVar(&c.enabledNmt, "enable-nmt", c.enabledNmt, "enable Native Memory Tracking (NMT)")
+	flags.BoolVar(&c.enableJfr, "enable-jfr", c.enableJfr, "enable Java Flight Recorder (JFR)")
+	flags.BoolVar(&c.enableJmx, "enable-jmx", c.enableJmx, "enable Java Management Extensions (JMX)")
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
 	}
