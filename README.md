@@ -51,12 +51,11 @@ Non-Heap = Direct Memory + Metaspace + Reserved Code Cache + (Thread Stack * Thr
 | 運行時將加載的 class 數量 | `--loaded-class-count` | `$BPL_JVM_LOADED_CLASS_COUNT` | 動態計算全部 class 總數量的 35%, 包含 App 目錄下及 JVM 中的 class 等 |
 | 運行時的用戶線程數 | `--thread-count` | `$BPL_JVM_THREAD_COUNT` | `200` |
 | App 目錄 | `--app-path` | | `/app` |
-| VM 建立參數 | `--jvm-options` | `$JAVA_TOOL_OPTIONS` | |
-| Java 啟動參數 |   | `$JAVA_OPTS` | |
-| Java Home |   | `$JAVA_HOME ` | |
-| 是否啟用 [NMT](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/tooldescr007.html) | `--enable-nmt` | `$BPL_JAVA_NMT_ENABLED` | `true` |
-| 是否啟用 [JFR](https://docs.oracle.com/javacomponents/jmc-5-4/jfr-runtime-guide/about.htm) | `--enable-jfr` | `$BPL_JFR_ENABLED` | `true` |
-| 是否啟用 JMX | `--enable-jmx` | `$BPL_JMX_ENABLED` | `true` |
+| Java 啟動參數 | `--jvm-options` | `$JAVA_OPTS` | |
+| 是否啟用 [JDWP](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/introclientissues005.html) | `--enable-jdwp` | `$BPL_DEBUG_ENABLED` | `true` |
+| 是否啟用 [NMT](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/tooldescr007.html) | `--enable-nmt` | `$BPL_JAVA_NMT_ENABLED` | `false` |
+| 是否啟用 [JFR](https://docs.oracle.com/javacomponents/jmc-5-4/jfr-runtime-guide/about.htm) | `--enable-jfr` | `$BPL_JFR_ENABLED` | `false` |
+| 是否啟用 [JMX](https://www.oracle.com/java/technologies/javase/javamanagement.html) | `--enable-jmx` | `$BPL_JMX_ENABLED` | `false ` |
 
 執行以下指令以查看完整的 args 參數說明:
 

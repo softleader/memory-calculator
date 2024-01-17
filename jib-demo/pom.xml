@@ -68,7 +68,7 @@
             <jvmFlags>
               <jvmFlag>-server</jvmFlag>
               <jvmFlag>-XX:+UseZGC</jvmFlag>
-              <jvmFlag>-Dmy</jvmFlag>
+              <jvmFlag>-Dmy.property=example.value</jvmFlag>
             </jvmFlags>
             <args>
               <arg>some</arg>

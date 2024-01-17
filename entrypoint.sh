@@ -16,10 +16,6 @@ read_jvm_flags() {
 }
 
 execute_memory_calculator() {
-  if [ "${MEM_CALC_ENABLED}" = "false" ]; then
-    return
-  fi
-
   local bin_path=$1
   local debug=$2
   $bin_path/memory-calculator -o="$TMP_ENV" -v="$debug" || { echo "Memory calculator failed"; exit 1; }

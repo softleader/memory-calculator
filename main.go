@@ -15,7 +15,9 @@ import (
 )
 
 const (
+	envEnabled                = "MEM_CALC_ENABLED"
 	envJavaHome               = "JAVA_HOME"
+	envJavaOpts               = "JAVA_OPTS"
 	envJavaToolOptions        = "JAVA_TOOL_OPTIONS"
 	envBplJvmHeadRoom         = "BPL_JVM_HEAD_ROOM"
 	envBplJvmThreadCount      = "BPL_JVM_THREAD_COUNT"
@@ -25,11 +27,18 @@ const (
 	envBplJavaNmtEnabled      = "BPL_JAVA_NMT_ENABLED"
 	envBplJfrEnabled          = "BPL_JFR_ENABLED"
 	envBplJmxEnabled          = "BPL_JMX_ENABLED"
+	envBplDebugEnabled        = "BPL_DEBUG_ENABLED"
+	envBplDebugPort           = "BPL_DEBUG_PORT"
 	envBpLogLevel             = "BP_LOG_LEVEL"
 	defaultJvmOptions         = ""
 	defaultHeadRoom           = helper.DefaultHeadroom
 	defaultThreadCount        = 200
 	defaultAppPath            = "/app"
+	defaultDebugPort          = 5005
+	defaultEnabledNmt         = false
+	defaultEnableJfr          = false
+	defaultEnableJmx          = false
+	defaultEnableJdwp         = true
 	desc                      = `This command calculate the JVM memory for applications to run smoothly and stay within the memory limits of the container.
 During the computation process, numerous parameters are required, which must be obtained in a specific order and logic.
 The sequence and explanations of these parameters are as follows:
@@ -53,14 +62,11 @@ The sequence and explanations of these parameters are as follows:
      - First, determine if '--app-path' is passed through args.
      - If not, the default directory is /app.
 
-  5. VM creation parameters:
+  5. Java startup parameters:
      - First, determine if '--jvm-options' is passed through args.
-     - If not, check the OS environment variable $JAVA_TOOL_OPTIONS.
+     - If not, check the OS environment variable $JAVA_OPTS.
 
-  6. Java startup parameters:
-     - Only check the OS environment variable $JAVA_OPTS.
-
-  7. Java home:
+  6. Java home:
      - Only check the OS environment variable $JAVA_HOME.
 
 Examples:
@@ -73,11 +79,13 @@ Examples:
 )
 
 var (
-	version               = "<unknown>"
-	staticJavaToolOptions = []string{"-XX:+ExitOnOutOfMemoryError"} // 固定要加上的參數
+	version = "<unknown>"
+	// 固定要加上的參數, 這些參數可能是 libjvm 在 build image 時加的而非計算出來的, 或是我們自己想要加上去的都可以放
+	contributeOptions = []string{"-XX:+ExitOnOutOfMemoryError"}
 )
 
 type Config struct {
+	enabled           bool // 整個機制是否啟用
 	jvmOptions        string
 	headRoom          int
 	threadCount       int
@@ -90,6 +98,7 @@ type Config struct {
 	enabledNmt        bool
 	enableJfr         bool
 	enableJmx         bool
+	enableJdwp        bool
 }
 
 func main() {
@@ -104,11 +113,15 @@ func main() {
 				fmt.Println(version)
 				return nil
 			}
+			if !c.enabled {
+				fmt.Printf("%v is disabled\n", cmd.Short)
+				return nil
+			}
 			return run(c)
 		},
 	}
 	flags := cmd.Flags()
-	flags.StringVar(&c.jvmOptions, "jvm-options", c.jvmOptions, "vm options, typically JAVA_TOOL_OPTIONS")
+	flags.StringVar(&c.jvmOptions, "jvm-options", c.jvmOptions, "vm options, typically JAVA_OPTS")
 	flags.IntVar(&c.headRoom, "head-room", c.headRoom, "percentage of total memory available which will be left unallocated to cover JVM overhead")
 	flags.IntVar(&c.threadCount, "thread-count", c.threadCount, "the number of user threads")
 	flags.IntVar(&c.loadedClassCount, "loaded-class-count", c.loadedClassCount, "the number of classes that will be loaded when the app is running")
@@ -119,6 +132,7 @@ func main() {
 	flags.BoolVar(&c.enabledNmt, "enable-nmt", c.enabledNmt, "enable Native Memory Tracking (NMT)")
 	flags.BoolVar(&c.enableJfr, "enable-jfr", c.enableJfr, "enable Java Flight Recorder (JFR)")
 	flags.BoolVar(&c.enableJmx, "enable-jmx", c.enableJmx, "enable Java Management Extensions (JMX)")
+	flags.BoolVar(&c.enableJdwp, "enable-jdwp", c.enableJdwp, "enable Java Debug Wire Protocol (JDWP)")
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
 	}
@@ -126,15 +140,22 @@ func main() {
 
 func newConfig() Config {
 	c := Config{
+		enabled:     true,
 		jvmOptions:  defaultJvmOptions,
 		headRoom:    defaultHeadRoom,
 		threadCount: defaultThreadCount,
 		appPath:     defaultAppPath,
-		enabledNmt:  true,
-		enableJfr:   true,
-		enableJmx:   true,
+		enabledNmt:  defaultEnabledNmt,
+		enableJfr:   defaultEnableJfr,
+		enableJmx:   defaultEnableJmx,
+		enableJdwp:  defaultEnableJdwp,
 	}
-	if val, ok := os.LookupEnv(envJavaToolOptions); ok {
+	if val, ok := os.LookupEnv(envEnabled); ok {
+		if b, err := strconv.ParseBool(val); err == nil {
+			c.enabled = b
+		}
+	}
+	if val, ok := os.LookupEnv(envJavaOpts); ok {
 		c.jvmOptions = val
 	}
 	if val, ok := os.LookupEnv(envBplJvmHeadRoom); ok {
@@ -153,13 +174,24 @@ func newConfig() Config {
 		c.verbose = val == "DEBUG"
 	}
 	if val, ok := os.LookupEnv(envBplJavaNmtEnabled); ok {
-		c.enabledNmt = val == "true"
+		if b, err := strconv.ParseBool(val); err == nil {
+			c.enabledNmt = b
+		}
 	}
 	if val, ok := os.LookupEnv(envBplJfrEnabled); ok {
-		c.enableJfr = val == "true"
+		if b, err := strconv.ParseBool(val); err == nil {
+			c.enableJfr = b
+		}
 	}
 	if val, ok := os.LookupEnv(envBplJmxEnabled); ok {
-		c.enableJmx = val == "true"
+		if b, err := strconv.ParseBool(val); err == nil {
+			c.enableJmx = b
+		}
+	}
+	if val, ok := os.LookupEnv(envBplDebugEnabled); ok {
+		if b, err := strconv.ParseBool(val); err == nil {
+			c.enableJdwp = b
+		}
 	}
 	return c
 }
@@ -168,8 +200,10 @@ func (c *Config) prepareLibJvmEnv() (err error) {
 	if c.verbose && os.Setenv(envBpLogLevel, "DEBUG") != nil {
 		return err
 	}
-	if err = os.Setenv(envBplJvmThreadCount, c.jvmOptions); err != nil {
-		return err
+	if c.jvmOptions != "" {
+		if err = os.Setenv(envJavaOpts, c.jvmOptions); err != nil {
+			return err
+		}
 	}
 	if err = os.Setenv(envBplJvmHeadRoom, strconv.Itoa(c.headRoom)); err != nil {
 		return err
@@ -178,15 +212,6 @@ func (c *Config) prepareLibJvmEnv() (err error) {
 		return err
 	}
 	if err = os.Setenv(envBpiApplicationPath, c.appPath); err != nil {
-		return err
-	}
-	if err = os.Setenv(envBplJavaNmtEnabled, strconv.FormatBool(c.enabledNmt)); err != nil {
-		return err
-	}
-	if err = os.Setenv(envBplJfrEnabled, strconv.FormatBool(c.enableJfr)); err != nil {
-		return err
-	}
-	if err = os.Setenv(envBplJmxEnabled, strconv.FormatBool(c.enableJmx)); err != nil {
 		return err
 	}
 	// 計算JVM本身的Class數量
@@ -204,6 +229,21 @@ func (c *Config) prepareLibJvmEnv() (err error) {
 	if err = os.Setenv(envBpiJvmLoadedClassCount, strconv.Itoa(c.loadedClassCount)); err != nil {
 		return err
 	}
+	if err = os.Setenv(envBplJmxEnabled, strconv.FormatBool(c.enableJmx)); err != nil {
+		return err
+	}
+	if err = os.Setenv(envBplJavaNmtEnabled, strconv.FormatBool(c.enabledNmt)); err != nil {
+		return err
+	}
+	if err = os.Setenv(envBplJfrEnabled, strconv.FormatBool(c.enableJfr)); err != nil {
+		return err
+	}
+	if err = os.Setenv(envBplDebugEnabled, strconv.FormatBool(c.enableJdwp)); err != nil {
+		return err
+	}
+	if err = os.Setenv(envBplDebugPort, strconv.Itoa(defaultDebugPort)); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -211,7 +251,7 @@ func run(c Config) (err error) {
 	if err = c.prepareLibJvmEnv(); err != nil {
 		return err
 	}
-	cmds, err := buildCommands()
+	cmds, err := c.buildCommands()
 	if err != nil {
 		return err
 	}
@@ -240,7 +280,7 @@ func run(c Config) (err error) {
 
 func getJavaToolOptions() string {
 	var javaToolOptions = os.Getenv(envJavaToolOptions)
-	for _, option := range staticJavaToolOptions {
+	for _, option := range contributeOptions {
 		if !strings.Contains(javaToolOptions, option) {
 			javaToolOptions += " " + option
 		}
@@ -248,9 +288,10 @@ func getJavaToolOptions() string {
 	return javaToolOptions
 }
 
-// 這邊基本上是從 libjvm@v1.44.0 cmd/helper/main.go 複製過來
+// 這邊基本上是從底層 libjvm 套件中複製過來, 我們只支援 Java 9+ 的計算
 // https://github.com/paketo-buildpacks/libjvm/blob/main/cmd/helper/main.go
-func buildCommands() (cmds map[string]sherpa.ExecD, err error) {
+// https://github.com/paketo-buildpacks/libjvm/blob/main/build.go#L274
+func (c *Config) buildCommands() (cmds map[string]sherpa.ExecD, err error) {
 	var (
 		l  = bard.NewLogger(os.Stdout)
 		cl = libjvm.NewCertificateLoader()
@@ -267,9 +308,7 @@ func buildCommands() (cmds map[string]sherpa.ExecD, err error) {
 			MemoryInfoPath:    helper.DefaultMemoryInfoPath,
 		}
 		o  = helper.OpenSSLCertificateLoader{CertificateLoader: cl, Logger: l}
-		s8 = helper.SecurityProvidersClasspath8{Logger: l}
 		s9 = helper.SecurityProvidersClasspath9{Logger: l}
-		d8 = helper.Debug8{Logger: l}
 		d9 = helper.Debug9{Logger: l}
 		jm = helper.JMX{Logger: l}
 		n  = helper.NMT{Logger: l}
@@ -289,20 +328,22 @@ func buildCommands() (cmds map[string]sherpa.ExecD, err error) {
 		"link-local-dns":                 d,
 		"memory-calculator":              m,
 		"openssl-certificate-loader":     o,
-		"security-providers-classpath-8": s8,
 		"security-providers-classpath-9": s9,
 		"security-providers-configurer":  spc,
-		"debug-8":                        d8,
 		"debug-9":                        d9,
 		"jmx":                            jm,
-		"enabledNmt":                     n,
+		"nmt":                            n,
 		"jfr":                            jf,
 	}
 
+	// 底層的實作中要求若開啟 jvm-cacert 則必須要設定相關的系統參數, 否則會報錯, 所以針對這個改成沒設定就不要跑了
 	if _, ok := os.LookupEnv(envBpiJvmCaCerts); !ok {
 		delete(cmds, "openssl-certificate-loader")
 	}
-
+	// 由於關閉 nmt 底層會印出一些關閉的 log, 我不想要看到那些, 所以針對這個改成沒開啟就不要跑了
+	if !c.enabledNmt {
+		delete(cmds, "nmt")
+	}
 	return cmds, nil
 }
 
