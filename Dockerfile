@@ -4,7 +4,9 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY main.go .
-RUN go vet && gofmt -s -w main.go && go build -o memory-calculator
+COPY calc ./calc
+COPY flags ./flags
+RUN go vet && gofmt -s -w . && go build -o memory-calculator
 
 FROM eclipse-temurin:17-jre-alpine
 COPY --from=builder /app/memory-calculator /usr/local/bin/memory-calculator
