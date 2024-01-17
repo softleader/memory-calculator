@@ -47,7 +47,6 @@ Non-Heap = Direct Memory + Metaspace + Reserved Code Cache + (Thread Stack * Thr
 
 | 參數說明 | 優先判斷 args 傳入  | 其次判斷 OS Variable | 最後的預設值或行為 |
 |---|---|---|---|
-| 是否啟用記憶體計算機制 | | `$MEM_CALC_ENABLED` | `true` |
 | 記憶體計算工具分配的預留空間百分比 | `--head-room` | `$BPL_JVM_HEAD_ROOM` | `0` |
 | 運行時將加載的 class 數量 | `--loaded-class-count` | `$BPL_JVM_LOADED_CLASS_COUNT` | 動態計算全部 class 總數量的 35%, 包含 App 目錄下及 JVM 中的 class 等 |
 | 運行時的用戶線程數 | `--thread-count` | `$BPL_JVM_THREAD_COUNT` | `200` |

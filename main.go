@@ -15,7 +15,6 @@ import (
 )
 
 const (
-	envEnabled                = "MEM_CALC_ENABLED"
 	envJavaHome               = "JAVA_HOME"
 	envJavaOpts               = "JAVA_OPTS"
 	envJavaToolOptions        = "JAVA_TOOL_OPTIONS"
@@ -85,7 +84,6 @@ var (
 )
 
 type Config struct {
-	enabled           bool // 整個機制是否啟用
 	jvmOptions        string
 	headRoom          int
 	threadCount       int
@@ -113,10 +111,6 @@ func main() {
 				fmt.Println(version)
 				return nil
 			}
-			if !c.enabled {
-				fmt.Printf("%v is disabled\n", cmd.Short)
-				return nil
-			}
 			return run(c)
 		},
 	}
@@ -140,7 +134,6 @@ func main() {
 
 func newConfig() Config {
 	c := Config{
-		enabled:     true,
 		jvmOptions:  defaultJvmOptions,
 		headRoom:    defaultHeadRoom,
 		threadCount: defaultThreadCount,
@@ -149,11 +142,6 @@ func newConfig() Config {
 		enableJfr:   defaultEnableJfr,
 		enableJmx:   defaultEnableJmx,
 		enableJdwp:  defaultEnableJdwp,
-	}
-	if val, ok := os.LookupEnv(envEnabled); ok {
-		if b, err := strconv.ParseBool(val); err == nil {
-			c.enabled = b
-		}
 	}
 	if val, ok := os.LookupEnv(envJavaOpts); ok {
 		c.jvmOptions = val
