@@ -80,7 +80,7 @@ memory-calculator -h
 
 - `MEM_CALC_HOME`：用於設定執行檔的目錄，預設值為: `/usr/local/bin`。
 - `MEM_CALC_ENABLED`：預設為 `true`，若將此值設為 `false`，則會跳過記憶體計算，直接啟動 Java 應用程式。
-- `DEBUG`：除錯模式，預設為 `false`，若將此值設為 `true`，則會列印出計算過程中除錯訊息，及啟動 Java 應用程式的完整指令。
+- `MEM_CALC_DEBUG`：除錯模式，預設為 `false`，若將此值設為 `true`，則會列印出計算過程中除錯訊息，及啟動 Java 應用程式的完整指令。
 
 ## 開發前準備
 

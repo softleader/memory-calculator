@@ -74,6 +74,9 @@
               <arg>some</arg>
               <arg>args</arg>
             </args>
+            <environment>
+              <JAVA_OPTS>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5011</JAVA_OPTS>
+            </environment>
             <ports>
               <port>8080</port>
               <port>5005</port>

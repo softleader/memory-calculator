@@ -37,7 +37,7 @@ execute_java_app() {
   [ "$DEBUG" = true ] && set +x
 }
 
-DEBUG="${DEBUG:-false}"
+DEBUG="${MEM_CALC_DEBUG:-false}"
 BIN="${MEM_CALC_HOME:-$DEFAULT_BIN_PATH}"
 JVM_FLAGS=$(read_jvm_flags)
 ARGS="$@"

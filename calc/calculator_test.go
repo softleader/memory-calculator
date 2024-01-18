@@ -27,62 +27,62 @@ func TestCalculator_Contribute(t *testing.T) {
 	}
 }
 
-func TestCalculator_buildCommands_HasCaCerts(t *testing.T) {
+func TestCalculator_buildHelpers_HasCaCerts(t *testing.T) {
 	calculator := NewCalculator()
 
 	os.Setenv(envBpiJvmCaCerts, "some-value")
 	defer os.Unsetenv(envBpiJvmCaCerts)
 
-	cmds, err := calculator.buildCommands()
+	helpers, err := calculator.buildHelpers()
 	if err != nil {
-		t.Fatalf("buildCommands returned an error: %v", err)
+		t.Fatalf("buildHelpers returned an error: %v", err)
 	}
 
-	if _, ok := cmds["openssl-certificate-loader"]; !ok {
-		t.Errorf("openssl-certificate-loader command not found in cmds")
+	if _, ok := helpers[helperOpensslCertificateLoader]; !ok {
+		t.Errorf(helperOpensslCertificateLoader + " helper not found in helpers")
 	}
 }
 
-func TestCalculator_buildCommands_NoCaCerts(t *testing.T) {
+func TestCalculator_buildHelpers_NoCaCerts(t *testing.T) {
 	calculator := NewCalculator()
 
 	os.Unsetenv(envBpiJvmCaCerts)
 	defer os.Unsetenv(envBpiJvmCaCerts)
 
-	cmds, err := calculator.buildCommands()
+	helpers, err := calculator.buildHelpers()
 	if err != nil {
-		t.Fatalf("buildCommands returned an error: %v", err)
+		t.Fatalf("buildHelpers returned an error: %v", err)
 	}
 
-	if _, ok := cmds["openssl-certificate-loader"]; ok {
-		t.Errorf("openssl-certificate-loader command should not be present")
+	if _, ok := helpers[helperOpensslCertificateLoader]; ok {
+		t.Errorf(helperOpensslCertificateLoader + " helper should not be present")
 	}
 }
 
-func TestCalculator_buildCommands_EnableNmt(t *testing.T) {
+func TestCalculator_buildHelpers_EnableNmt(t *testing.T) {
 	calculator := NewCalculator()
 	*calculator.EnableNmt = true
 
-	cmds, err := calculator.buildCommands()
+	helpers, err := calculator.buildHelpers()
 	if err != nil {
-		t.Fatalf("buildCommands returned an error: %v", err)
+		t.Fatalf("buildHelpers returned an error: %v", err)
 	}
 
-	if _, ok := cmds["nmt"]; !ok {
-		t.Errorf("nmt command should be present")
+	if _, ok := helpers[helperNmt]; !ok {
+		t.Errorf(helperNmt + " helper should be present")
 	}
 }
 
-func TestCalculator_buildCommands_DisableNmt(t *testing.T) {
+func TestCalculator_buildHelpers_DisableNmt(t *testing.T) {
 	calculator := NewCalculator()
 	*calculator.EnableNmt = false
 
-	cmds, err := calculator.buildCommands()
+	helpers, err := calculator.buildHelpers()
 	if err != nil {
-		t.Fatalf("buildCommands returned an error: %v", err)
+		t.Fatalf("buildHelpers returned an error: %v", err)
 	}
 
-	if _, ok := cmds["nmt"]; ok {
-		t.Errorf("nmt command should not be present")
+	if _, ok := helpers[helperNmt]; ok {
+		t.Errorf(helperNmt + " helper should not be present")
 	}
 }
