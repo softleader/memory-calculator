@@ -11,6 +11,7 @@ const (
 	DefaultLoadedClassCount = LoadedClassCount(0)
 	FlagLoadedClassCount    = "loaded-class-count"
 	EnvLoadedClassCount     = "BPL_JVM_LOADED_CLASS_COUNT"
+	EnvJvmClassCount        = "BPI_JVM_CLASS_COUNT"
 	UsageLoadedClassCount   = "the number of classes that will be loaded when the app is running"
 	envJavaHome             = "JAVA_HOME"
 )
@@ -55,6 +56,9 @@ func (lcc *LoadedClassCount) Contribute() error {
 			}
 			*lcc = LoadedClassCount(jvmClassCount)
 		}
+	}
+	if err := os.Setenv(EnvJvmClassCount, lcc.String()); err != nil {
+		return err
 	}
 	return nil
 }
