@@ -1,4 +1,4 @@
-package flags
+package calc
 
 import (
 	"github.com/paketo-buildpacks/libjvm/helper"

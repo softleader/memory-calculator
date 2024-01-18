@@ -5,7 +5,6 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY main.go .
 COPY calc ./calc
-COPY flags ./flags
 RUN go vet && gofmt -s -w . && go build -o memory-calculator
 
 FROM eclipse-temurin:17-jre-alpine

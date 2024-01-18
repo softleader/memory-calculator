@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/softleader/memory-calculator/calc"
-	"github.com/softleader/memory-calculator/flags"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -72,16 +71,16 @@ func main() {
 		},
 	}
 	f := cmd.Flags()
-	f.Var(c.calc.JVMOptions, flags.FlagJVMOptions, flags.UsageJVMOptions)
-	f.Var(c.calc.HeadRoom, flags.FlagHeadRoom, flags.UsageHeadRoom)
-	f.Var(c.calc.ThreadCount, flags.FlagThreadCount, flags.UsageThreadCount)
-	f.Var(c.calc.LoadedClassCount, flags.FlagLoadedClassCount, flags.UsageLoadedClassCount)
-	f.Var(c.calc.AppPath, flags.FlagAppPath, flags.UsageAppPath)
-	f.Var(c.calc.EnableNmt, flags.FlagEnableNmt, flags.UsageEnableNmt)
-	f.Var(c.calc.EnableJfr, flags.FlagEnableJfr, flags.UsageEnableJfr)
-	f.Var(c.calc.EnableJmx, flags.FlagEnableJmx, flags.UsageEnableJmx)
-	f.Var(c.calc.EnableJdwp, flags.FlagEnableJdwp, flags.UsageEnableJdwp)
-	f.VarP(c.calc.Verbose, flags.FlagVerbose, flags.FlagShortVerbose, flags.UsageVerbose)
+	f.Var(c.calc.JVMOptions, calc.FlagJVMOptions, calc.UsageJVMOptions)
+	f.Var(c.calc.HeadRoom, calc.FlagHeadRoom, calc.UsageHeadRoom)
+	f.Var(c.calc.ThreadCount, calc.FlagThreadCount, calc.UsageThreadCount)
+	f.Var(c.calc.LoadedClassCount, calc.FlagLoadedClassCount, calc.UsageLoadedClassCount)
+	f.Var(c.calc.AppPath, calc.FlagAppPath, calc.UsageAppPath)
+	f.Var(c.calc.EnableNmt, calc.FlagEnableNmt, calc.UsageEnableNmt)
+	f.Var(c.calc.EnableJfr, calc.FlagEnableJfr, calc.UsageEnableJfr)
+	f.Var(c.calc.EnableJmx, calc.FlagEnableJmx, calc.UsageEnableJmx)
+	f.Var(c.calc.EnableJdwp, calc.FlagEnableJdwp, calc.UsageEnableJdwp)
+	f.VarP(c.calc.Verbose, calc.FlagVerbose, calc.FlagShortVerbose, calc.UsageVerbose)
 	f.StringVarP(&c.output, "output", "o", c.output, "write to a file, instead of STDOUT")
 	f.BoolVar(&c.version, "version", c.version, "print version and exit")
 	if err := cmd.Execute(); err != nil {
@@ -94,32 +93,17 @@ func run(c config) error {
 		fmt.Println(version)
 		return nil
 	}
-	options, err := c.calc.Execute()
+	j, err := c.calc.Execute()
 	if err != nil {
 		return err
 	}
-	return c.out(options)
+	return c.out(j)
 }
 
-func (c *config) out(content string) error {
+func (c *config) out(j *calc.JavaToolOptions) error {
 	if c.output == "" {
-		fmt.Printf("%v: %v\n", calc.EnvJavaToolOptions, content)
+		j.Print()
 		return nil
 	}
-	return writeFile(c.output, content)
-}
-
-func writeFile(file string, content string) error {
-	out, err := os.Create(file)
-	if err != nil {
-		return err
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			fmt.Printf("WARNING: failed to close file %v: %v\n", file.Name(), err)
-		}
-	}(out)
-	_, err = out.WriteString(fmt.Sprintf("export %v='%s'\n", calc.EnvJavaToolOptions, content))
-	return err
+	return j.WriteFile(c.output)
 }
