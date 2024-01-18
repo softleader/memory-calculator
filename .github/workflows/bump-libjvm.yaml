@@ -1,0 +1,51 @@
+name: Bump libjvm
+
+on:
+  # 手動觸發，可做用於任一 branch
+  workflow_dispatch:
+  # 排程觸發，只做用於 default branch
+  schedule:
+    - cron: "0 0 * * 1" # In UTC time, 格式請參考: https://crontab.guru/
+
+jobs:
+  bump-libjvm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20.x'
+          cache-dependency-path: cache-dependency/go.sum
+      - id: current-version
+        run: |
+          echo "version=$(go list -m -f '{{.Version}}' github.com/paketo-buildpacks/libjvm)" >> "$GITHUB_OUTPUT"
+      - id: bump-version
+        run: go get github.com/paketo-buildpacks/libjvm
+      - id: latest-version
+        run: |
+          echo "version=$(go list -m -f '{{.Version}}' github.com/paketo-buildpacks/libjvm)" >> "$GITHUB_OUTPUT"
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v5
+        # 請參考 https://github.com/peter-evans/create-pull-request 以獲得更詳盡的說明
+        with:
+          commit-message: "chore: bump libjvm from ${{ steps.current-version.outputs.version }} to ${{ steps.latest-version.outputs.version }}"
+          title: "Bump libjvm from ${{ steps.current-version.outputs.version }} to ${{ steps.latest-version.outputs.version }}"
+          committer: libjvmbot 👾 <libjvmbot-noreply@softleader.com.tw>
+          author: libjvmbot 👾 <libjvmbot-noreply@softleader.com.tw>
+          body: >-
+            Bumps [paketo-buildpacks/libjvm](https://github.com/paketo-buildpacks/libjvm)
+            from ${{ steps.current-version.outputs.version }}
+            to [${{ steps.latest-version.outputs.version }}](https://github.com/paketo-buildpacks/libjvm/releases/tag/${{ steps.latest-version.outputs.version }})
+          labels: "dependency-upgrade"
+          branch: "libjvmbot/${{ github.ref_name }}/libjvm-${{ steps.current-version.outputs.version }}-${{ steps.latest-version.outputs.version }}"
+          delete-branch: true
+      - name: Enable Auto-merge
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        run: gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
