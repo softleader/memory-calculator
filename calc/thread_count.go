@@ -8,7 +8,7 @@ import (
 const (
 	DefaultThreadCount = ThreadCount(200)
 	FlagThreadCount    = "thread-count"
-	EnvThreadCount     = "BPL_JVM_LOADED_CLASS_COUNT"
+	EnvThreadCount     = "BPL_JVM_THREAD_COUNT"
 	UsageThreadCount   = "the number of user threads"
 )
 
