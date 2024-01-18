@@ -72,12 +72,12 @@ func (c *Calculator) Execute() (*JavaToolOptions, error) {
 		return nil, err
 	}
 
-	helpers, err := c.buildHelpers()
+	hs, err := c.buildHelpers()
 	if err != nil {
 		return nil, err
 	}
 
-	helpersInOrder := []string{
+	inOrder := []string{
 		helperActiveProcessorCount,
 		helperJavaOpts,
 		helperJvmHeap,
@@ -92,9 +92,9 @@ func (c *Calculator) Execute() (*JavaToolOptions, error) {
 		helperJfr,
 	}
 
-	// 按照指定順序執行命令
-	for _, key := range helpersInOrder {
-		h, ok := helpers[key]
+	// 按照指定順序執行
+	for _, key := range inOrder {
+		h, ok := hs[key]
 		if !ok {
 			continue
 		}
@@ -116,7 +116,7 @@ func (c *Calculator) Execute() (*JavaToolOptions, error) {
 // 這邊基本上是從底層 libjvm 套件中複製過來, 我們只支援 Java 9+ 的計算
 // https://github.com/paketo-buildpacks/libjvm/blob/main/cmd/helper/main.go
 // https://github.com/paketo-buildpacks/libjvm/blob/main/build.go#L274
-func (c *Calculator) buildHelpers() (helpers map[string]sherpa.ExecD, err error) {
+func (c *Calculator) buildHelpers() (h map[string]sherpa.ExecD, err error) {
 	var (
 		l  = bard.NewLogger(os.Stdout)
 		cl = libjvm.NewCertificateLoader()
@@ -146,7 +146,7 @@ func (c *Calculator) buildHelpers() (helpers map[string]sherpa.ExecD, err error)
 		return nil, fmt.Errorf("unable to read DNS client configuration from %s\n%w", file, err)
 	}
 
-	helpers = map[string]sherpa.ExecD{
+	h = map[string]sherpa.ExecD{
 		helperActiveProcessorCount:        a,
 		helperJavaOpts:                    j,
 		helperJvmHeap:                     jh,
@@ -163,13 +163,13 @@ func (c *Calculator) buildHelpers() (helpers map[string]sherpa.ExecD, err error)
 
 	// 底層的實作中要求若開啟 jvm-cacert 則必須要設定相關的系統參數, 否則會報錯, 所以針對這個改成沒設定就不要跑了
 	if _, ok := os.LookupEnv(envBpiJvmCaCerts); !ok {
-		delete(helpers, helperOpensslCertificateLoader)
+		delete(h, helperOpensslCertificateLoader)
 	}
 	// 由於關閉 nmt 底層會印出一些關閉的 log, 我不想要看到那些, 所以針對這個改成沒開啟就不要跑了
 	if !*c.EnableNmt {
-		delete(helpers, helperNmt)
+		delete(h, helperNmt)
 	}
-	return helpers, nil
+	return h, nil
 }
 
 func contribute(cs ...Contributor) error {
