@@ -16,6 +16,10 @@ In the calculation process, most parameters have default values, with the loaded
   - If not, it will examine the environment variable $BPL_JVM_LOADED_CLASS_COUNT.
   - If neither option is available, it calculates the sum of the class counts in the App directory and the JVM as the loaded class count.
 
+  Additionally, the App directory will first consider whether '--app-path' has been passed as an argument; if not, it defaults to using /app.
+  The JVM class count will initially reference whether '--jvm-class-count' has been passed as an argument;
+  if not, it will automatically calculate the number of classes under JAVA_HOME.
+
 Examples:
   # Minimum example of input parameters
   memory-calculator --loaded-class-count 10000
