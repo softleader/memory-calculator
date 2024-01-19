@@ -16,6 +16,9 @@ type AppPath string
 
 func NewAppPath() *AppPath {
 	ap := DefaultAppPath
+	if val, ok := os.LookupEnv(EnvAppPath); ok {
+		ap = AppPath(val)
+	}
 	return &ap
 }
 

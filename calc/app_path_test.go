@@ -5,15 +5,24 @@ import (
 	"testing"
 )
 
-func TestAppPath_Set(t *testing.T) {
-	appPath := NewAppPath()
-	testValue := "/test/path"
-	err := appPath.Set(testValue)
-	if err != nil {
-		t.Errorf("Set returned an error: %v", err)
+func TestNewAppPath_NoEnvVar(t *testing.T) {
+	os.Unsetenv(EnvAppPath)
+	defer os.Unsetenv(EnvAppPath)
+
+	j := NewAppPath()
+	if *j != DefaultAppPath {
+		t.Errorf("Expected default value '%s', got '%s'", DefaultAppPath, *j)
 	}
-	if appPath.String() != testValue {
-		t.Errorf("Expected AppPath value '%s', got '%s'", testValue, appPath.String())
+}
+
+func TestNewAppPath_EnvVarSet(t *testing.T) {
+	testValue := "/test/path"
+	os.Setenv(EnvAppPath, testValue)
+	defer os.Unsetenv(EnvAppPath)
+
+	j := NewAppPath()
+	if *j != AppPath(testValue) {
+		t.Errorf("Expected value '%s', got '%s'", testValue, *j)
 	}
 }
 
