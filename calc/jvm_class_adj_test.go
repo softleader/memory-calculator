@@ -25,7 +25,7 @@ func TestNewJVMClassAdj_WithEnvVar(t *testing.T) {
 }
 
 func TestContribute_PositiveValue(t *testing.T) {
-	jca := JVMClassAdj(5)
+	jca := JVMClassAdj("5")
 	err := jca.Contribute()
 	defer os.Unsetenv(EnvJVMClassAdj)
 	if err != nil {
@@ -39,7 +39,7 @@ func TestContribute_PositiveValue(t *testing.T) {
 }
 
 func TestContribute_NonPositiveValue(t *testing.T) {
-	jca := JVMClassAdj(0)
+	jca := JVMClassAdj("")
 	err := jca.Contribute()
 	defer os.Unsetenv(EnvJVMClassAdj)
 	if err != nil {

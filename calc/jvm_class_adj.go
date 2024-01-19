@@ -1,49 +1,43 @@
 package calc
 
 import (
+	"fmt"
 	"os"
-	"strconv"
 )
 
 const (
-	DefaultJVMClassAdj = JVMClassAdj(0)
+	DefaultJVMClassAdj = JVMClassAdj("")
 	FlagJVMClassAdj    = "jvm-class-adj"
 	EnvJVMClassAdj     = "BPL_JVM_CLASS_ADJUSTMENT"
-	UsageJVMClassAdj   = "the adjustment for JVM classes number"
+	UsageJVMClassAdj   = "the adjustment for the number or percentage of JVM classes"
 )
 
-type JVMClassAdj int
+type JVMClassAdj string
 
 func NewJVMClassAdj() *JVMClassAdj {
-	lcc := DefaultJVMClassAdj
+	j := DefaultJVMClassAdj
 	if val, ok := os.LookupEnv(EnvJVMClassAdj); ok {
-		f, _ := strconv.Atoi(val)
-		lcc = JVMClassAdj(f)
+		j = JVMClassAdj(val)
 	}
-	return &lcc
+	return &j
 }
 
-func (jca *JVMClassAdj) Set(s string) error {
-	f, err := strconv.ParseInt(s, 10, 64)
-	if err != nil {
-		return err
-	}
-
-	*jca = JVMClassAdj(f)
+func (j *JVMClassAdj) Set(s string) error {
+	*j = JVMClassAdj(s)
 	return nil
 }
 
-func (jca *JVMClassAdj) Type() string {
-	return "int"
+func (j *JVMClassAdj) String() string {
+	return fmt.Sprintf("%s", *j)
 }
 
-func (jca *JVMClassAdj) String() string {
-	return strconv.FormatInt(int64(*jca), 10)
+func (j *JVMClassAdj) Type() string {
+	return "string"
 }
 
-func (jca *JVMClassAdj) Contribute() error {
-	if *jca > 0 {
-		if err := os.Setenv(EnvJVMClassAdj, jca.String()); err != nil {
+func (j *JVMClassAdj) Contribute() error {
+	if s := j.String(); s != "" {
+		if err := os.Setenv(EnvJVMClassAdj, s); err != nil {
 			return err
 		}
 	}
