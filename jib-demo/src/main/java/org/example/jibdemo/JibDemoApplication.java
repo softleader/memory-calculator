@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 public class JibDemoApplication {
 
   public static void main(String[] args) {
+    log.info("=== main.args ===");
+    java.util.Arrays.stream(args).forEach(log::info);
     SpringApplication.run(JibDemoApplication.class, args);
   }
 

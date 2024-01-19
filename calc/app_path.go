@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	DefaultAppPath = AppPath("")
+	DefaultAppPath = AppPath("/app")
 	FlagAppPath    = "app-path"
 	EnvAppPath     = "BPI_APPLICATION_PATH"
 	UsageAppPath   = "the directory on the container where the app's contents are placed"

@@ -28,23 +28,21 @@ func TestNewLoadedClassCount_EnvVarSet(t *testing.T) {
 	}
 }
 
-func TestLoadedClassCount_Contribute_ZeroWithoutJavaHome(t *testing.T) {
-	os.Unsetenv(envJavaHome)
-	defer os.Unsetenv(envJavaHome)
-
-	lcc := LoadedClassCount(0)
-	err := lcc.Contribute()
-	if err == nil {
-		t.Fatalf("Contribute should return an error when JAVA_HOME is not set")
-	}
-}
-
-func TestLoadedClassCount_Contribute_NonZero(t *testing.T) {
+func TestLoadedClassCount_Contribute(t *testing.T) {
 	testValue := 100
 	lcc := LoadedClassCount(testValue)
 	err := lcc.Contribute()
 	defer os.Unsetenv(EnvLoadedClassCount)
 	if err != nil {
 		t.Fatalf("Contribute returned an error: %v", err)
+	}
+
+	envValue, exists := os.LookupEnv(EnvLoadedClassCount)
+	if !exists {
+		t.Fatalf("Environment variable %s not set", EnvLoadedClassCount)
+	}
+	expectedEnvValue := strconv.Itoa(testValue)
+	if envValue != expectedEnvValue {
+		t.Errorf("Expected environment variable %s to be '%s', got '%s'", EnvLoadedClassCount, expectedEnvValue, envValue)
 	}
 }

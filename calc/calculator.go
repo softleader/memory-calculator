@@ -32,6 +32,8 @@ type Calculator struct {
 	HeadRoom         *HeadRoom
 	ThreadCount      *ThreadCount
 	LoadedClassCount *LoadedClassCount
+	JVMClassCount    *JVMClassCount
+	JVMClassAdj      *JVMClassAdj
 	AppPath          *AppPath
 	EnableNmt        *EnableNmt
 	EnableJfr        *EnableJfr
@@ -46,6 +48,8 @@ func NewCalculator() Calculator {
 		HeadRoom:         NewHeadRoom(),
 		ThreadCount:      NewThreadCount(),
 		LoadedClassCount: NewLoadedClassCount(),
+		JVMClassCount:    NewJVMClassCount(),
+		JVMClassAdj:      NewJVMClassAdj(),
 		AppPath:          NewAppPath(),
 		EnableNmt:        NewEnableNmt(),
 		EnableJfr:        NewEnableJfr(),
@@ -57,18 +61,7 @@ func NewCalculator() Calculator {
 }
 
 func (c *Calculator) Execute() (*JavaToolOptions, error) {
-	if err := contribute(
-		c.JVMOptions,
-		c.HeadRoom,
-		c.ThreadCount,
-		c.LoadedClassCount,
-		c.AppPath,
-		c.EnableNmt,
-		c.EnableJfr,
-		c.EnableJmx,
-		c.EnableJdwp,
-		c.Verbose,
-	); err != nil {
+	if err := c.contribute(); err != nil {
 		return nil, err
 	}
 
@@ -170,6 +163,32 @@ func (c *Calculator) buildHelpers() (h map[string]sherpa.ExecD, err error) {
 		delete(h, helperNmt)
 	}
 	return h, nil
+}
+
+func (c *Calculator) contribute() error {
+	// 這邊有些底層互斥的邏輯, 避免效能浪費, 所以要針對這些互斥的做一些判斷
+	// ref: https://github.com/paketo-buildpacks/libjvm/blob/main/helper/memory_calculator.go
+	if c.LoadedClassCount.HasValue() {
+		if err := contribute(c.LoadedClassCount); err != nil {
+			return err
+		}
+	} else {
+		if err := contribute(c.AppPath, c.JVMClassCount, c.JVMClassAdj); err != nil {
+			return err
+		}
+	}
+
+	// 無論如何都會執行
+	return contribute(
+		c.JVMOptions,
+		c.HeadRoom,
+		c.ThreadCount,
+		c.EnableNmt,
+		c.EnableJfr,
+		c.EnableJmx,
+		c.EnableJdwp,
+		c.Verbose,
+	)
 }
 
 func contribute(cs ...Contributor) error {

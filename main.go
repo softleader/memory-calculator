@@ -75,6 +75,8 @@ func main() {
 	f.Var(c.calc.HeadRoom, calc.FlagHeadRoom, calc.UsageHeadRoom)
 	f.Var(c.calc.ThreadCount, calc.FlagThreadCount, calc.UsageThreadCount)
 	f.Var(c.calc.LoadedClassCount, calc.FlagLoadedClassCount, calc.UsageLoadedClassCount)
+	f.Var(c.calc.JVMClassCount, calc.FlagJVMClassCount, calc.UsageJVMClassCount)
+	f.Var(c.calc.JVMClassAdj, calc.FlagJVMClassAdj, calc.UsageJVMClassAdj)
 	f.Var(c.calc.AppPath, calc.FlagAppPath, calc.UsageAppPath)
 	f.Var(c.calc.EnableNmt, calc.FlagEnableNmt, calc.UsageEnableNmt)
 	f.Var(c.calc.EnableJfr, calc.FlagEnableJfr, calc.UsageEnableJfr)
