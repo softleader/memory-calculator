@@ -48,9 +48,12 @@ Non-Heap = Direct Memory + Metaspace + Reserved Code Cache + (Thread Stack * Thr
 | 參數說明 | 優先判斷 args 傳入  | 其次判斷 OS Variable | 最後的預設值或行為 |
 |---|---|---|---|
 | 記憶體計算工具分配的預留空間百分比 | `--head-room` | `$BPL_JVM_HEAD_ROOM` | `0` |
-| 運行時將加載的 class 數量 | `--loaded-class-count` | `$BPL_JVM_LOADED_CLASS_COUNT` | 動態計算全部 class 總數量的 35%, 包含 App 目錄下及 JVM 中的 class 等 |
 | 運行時的用戶線程數 | `--thread-count` | `$BPL_JVM_THREAD_COUNT` | `200` |
-| App 目錄 | `--app-path` | | `/app` |
+| 運行時將加載的 class 數量 | `--loaded-class-count` | `$BPL_JVM_LOADED_CLASS_COUNT` | 若沒提供, 則以 App 目錄, JVM class 數量, JVM class 數量調整, 於啟動時動態的計算出建議值 |
+| App 目錄 | `--app-path` | `$BPI_APPLICATION_PATH` | `/app` |
+| JVM class 數量 | `--jvm-class-count` | `$BPI_JVM_CLASS_COUNT` | 若沒提供, 則動態計算 `$JAVA_HOME` 下的 class 數量 |
+| JVM class 數量調整 | `--jvm-class-adj` | `$BPL_JVM_CLASS_ADJUSTMENT` | `0`, 可以是百分比會是絕對數字 |
+| JVM CA 目錄 | `--jvm-cacerts` | `$BPI_JVM_CACERTS` | 若沒提供, 則試著使用 `$JAVA_HOME/lib/security/cacerts` |
 | Java 啟動參數 | `--jvm-options` | `$JAVA_OPTS` | |
 | 是否啟用 [JDWP](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/introclientissues005.html) | `--enable-jdwp` | `$BPL_DEBUG_ENABLED` | `true` |
 | 是否啟用 [NMT](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/tooldescr007.html) | `--enable-nmt` | `$BPL_JAVA_NMT_ENABLED` | `false` |
