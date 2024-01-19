@@ -10,8 +10,8 @@ const (
 	DefaultJVMCacerts = JVMCacerts("")
 	FlagJVMCacerts    = "jvm-cacerts"
 	EnvJVMCacerts     = "BPI_JVM_CACERTS"
-	cacertsSubPath    = "/lib/security/cacerts"
-	UsageJVMCacerts   = "path to jvm cacerts, typically 'JAVA_HOME" + cacertsSubPath + "'"
+	subPathCacerts    = "/lib/security/cacerts"
+	UsageJVMCacerts   = "path to jvm cacerts, typically 'JAVA_HOME" + subPathCacerts + "'"
 )
 
 type JVMCacerts string
@@ -40,14 +40,14 @@ func (j *JVMCacerts) Type() string {
 func (j *JVMCacerts) Contribute() error {
 	if s := j.String(); s == "" {
 		if javaHome, ok := os.LookupEnv(envJavaHome); ok {
-			cacert := filepath.Join(javaHome, cacertsSubPath)
+			cacert := filepath.Join(javaHome, subPathCacerts)
 			if exist, err := isFileExist(cacert); exist && err == nil {
 				*j = JVMCacerts(cacert)
 			}
 		}
 	}
-	if *j != "" {
-		if err := os.Setenv(EnvJVMCacerts, j.String()); err != nil {
+	if s := j.String(); s != "" {
+		if err := os.Setenv(EnvJVMCacerts, s); err != nil {
 			return err
 		}
 	}
