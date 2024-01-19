@@ -9,7 +9,7 @@ const (
 	DefaultEnableNmt = EnableNmt(false)
 	FlagEnableNmt    = "enable-nmt"
 	EnvEnableNmt     = "BPL_JAVA_NMT_ENABLED"
-	UsageEnableNmt   = "enable Native Memory Tracking (NMT)"
+	UsageEnableNmt   = "enables Native Memory Tracking (NMT)"
 )
 
 type EnableNmt bool

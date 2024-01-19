@@ -9,7 +9,7 @@ const (
 	DefaultEnableJmx = EnableJmx(false)
 	FlagEnableJmx    = "enable-jmx"
 	EnvEnableJmx     = "BPL_JMX_ENABLED"
-	UsageEnableJmx   = "enable Java Management Extensions (JMX)"
+	UsageEnableJmx   = "enables Java Management Extensions (JMX)"
 )
 
 type EnableJmx bool

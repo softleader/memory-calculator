@@ -12,7 +12,6 @@ const (
 	FlagJVMClassCount    = "jvm-class-count"
 	EnvJVMClassCount     = "BPI_JVM_CLASS_COUNT"
 	UsageJVMClassCount   = "the number of JVM classes"
-	envJavaHome          = "JAVA_HOME"
 )
 
 type JVMClassCount int

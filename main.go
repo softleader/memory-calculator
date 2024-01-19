@@ -9,37 +9,18 @@ import (
 
 const (
 	desc = `This command calculate the JVM memory for applications to run smoothly and stay within the memory limits of the container.
-During the computation process, numerous parameters are required, which must be obtained in a specific order and logic.
-The sequence and explanations of these parameters are as follows:
 
-  1. Percentage of reserved space allocated by Memory Calculation tool:
-     - First, determine if '--head-room' is passed through args.
-     - If not, check the OS environment variable $BPL_JVM_HEAD_ROOM.
-     - If neither is available, the default value is 0.
+In the calculation process, most parameters have default values, with the loaded class count being the most crucial one:
 
-  2. Number of classes loaded at runtime:
-     - First, determine if '--loaded-class-count' is passed through args.
-     - If not, check the OS environment variable $BPL_JVM_LOADED_CLASS_COUNT.
-     - If neither is available, dynamically calculate 35% of the total number of classes in the App directory.
-
-  3. Number of user threads at runtime:
-     - First, determine if '--thread-count' is passed through args.
-     - If not, check the OS environment variable $BPL_JVM_THREAD_COUNT.
-     - If neither is available, the default value is 200.
-
-  4. App directory:
-     - First, determine if '--app-path' is passed through args.
-     - If not, the default directory is /app.
-
-  5. Java startup parameters:
-     - First, determine if '--jvm-options' is passed through args.
-     - If not, check the OS environment variable $JAVA_OPTS.
-
-  6. Java home:
-     - Only check the OS environment variable $JAVA_HOME.
+  - First, it checks if '--loaded-class-count' has been passed as an argument.
+  - If not, it will examine the environment variable $BPL_JVM_LOADED_CLASS_COUNT.
+  - If neither option is available, it calculates the sum of the class counts in the App directory and the JVM as the loaded class count.
 
 Examples:
-  # Use ZGC and output to /tmp/.env
+  # Minimum example of input parameters
+  memory-calculator --loaded-class-count 10000
+
+  # Use ZGC and output to /tmp/.env and auto detect the loaded class count
   memory-calculator --jvm-options '-XX:+UseZGC' -o '/tmp/.env'
 
   # Print the version and exit
@@ -77,6 +58,7 @@ func main() {
 	f.Var(c.calc.LoadedClassCount, calc.FlagLoadedClassCount, calc.UsageLoadedClassCount)
 	f.Var(c.calc.JVMClassCount, calc.FlagJVMClassCount, calc.UsageJVMClassCount)
 	f.Var(c.calc.JVMClassAdj, calc.FlagJVMClassAdj, calc.UsageJVMClassAdj)
+	f.Var(c.calc.JVMCacerts, calc.FlagJVMCacerts, calc.UsageJVMCacerts)
 	f.Var(c.calc.AppPath, calc.FlagAppPath, calc.UsageAppPath)
 	f.Var(c.calc.EnableNmt, calc.FlagEnableNmt, calc.UsageEnableNmt)
 	f.Var(c.calc.EnableJfr, calc.FlagEnableJfr, calc.UsageEnableJfr)

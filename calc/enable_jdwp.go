@@ -9,7 +9,7 @@ const (
 	DefaultEnableJdwp = EnableJdwp(true)
 	FlagEnableJdwp    = "enable-jdwp"
 	EnvEnableJdwp     = "BPL_DEBUG_ENABLED"
-	UsageEnableJdwp   = "enable Java Debug Wire Protocol (JDWP)"
+	UsageEnableJdwp   = "enables Java Debug Wire Protocol (JDWP)"
 	envBplDebugPort   = "BPL_DEBUG_PORT"
 	defaultDebugPort  = 5005
 )

@@ -9,7 +9,7 @@ const (
 	DefaultEnableJfr = EnableJfr(false)
 	FlagEnableJfr    = "enable-jfr"
 	EnvEnableJfr     = "BPL_JFR_ENABLED"
-	UsageEnableJfr   = "enable Java Flight Recorder (JFR)"
+	UsageEnableJfr   = "enables Java Flight Recorder (JFR)"
 )
 
 type EnableJfr bool

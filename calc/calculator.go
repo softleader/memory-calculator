@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	envBpiJvmCaCerts                  = "BPI_JVM_CACERTS"
+	envJavaHome                       = "JAVA_HOME"
 	helperActiveProcessorCount        = "active-processor-count"
 	helperJavaOpts                    = "java-opts"
 	helperJvmHeap                     = "jvm-heap"
@@ -34,6 +34,7 @@ type Calculator struct {
 	LoadedClassCount *LoadedClassCount
 	JVMClassCount    *JVMClassCount
 	JVMClassAdj      *JVMClassAdj
+	JVMCacerts       *JVMCacerts
 	AppPath          *AppPath
 	EnableNmt        *EnableNmt
 	EnableJfr        *EnableJfr
@@ -50,6 +51,7 @@ func NewCalculator() Calculator {
 		LoadedClassCount: NewLoadedClassCount(),
 		JVMClassCount:    NewJVMClassCount(),
 		JVMClassAdj:      NewJVMClassAdj(),
+		JVMCacerts:       NewJVMCacerts(),
 		AppPath:          NewAppPath(),
 		EnableNmt:        NewEnableNmt(),
 		EnableJfr:        NewEnableJfr(),
@@ -153,9 +155,8 @@ func (c *Calculator) buildHelpers() (h map[string]sherpa.ExecD, err error) {
 		helperNmt:                         n,
 		helperJfr:                         jf,
 	}
-
 	// 底層的實作中要求若開啟 jvm-cacert 則必須要設定相關的系統參數, 否則會報錯, 所以針對這個改成沒設定就不要跑了
-	if _, ok := os.LookupEnv(envBpiJvmCaCerts); !ok {
+	if *c.JVMCacerts == "" {
 		delete(h, helperOpensslCertificateLoader)
 	}
 	// 由於關閉 nmt 底層會印出一些關閉的 log, 我不想要看到那些, 所以針對這個改成沒開啟就不要跑了
@@ -183,6 +184,7 @@ func (c *Calculator) contribute() error {
 		c.JVMOptions,
 		c.HeadRoom,
 		c.ThreadCount,
+		c.JVMCacerts,
 		c.EnableNmt,
 		c.EnableJfr,
 		c.EnableJmx,
