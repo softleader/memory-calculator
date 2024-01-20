@@ -18,7 +18,7 @@ func TestMemoryCalculation_WithLoadedClassCount(t *testing.T) {
 	for _, o := range calc.ContributeOptions {
 		options = strings.ReplaceAll(options, o, "")
 	}
-	if options == " " {
+	if options == "" {
 		t.Errorf("Execute returned an empty string")
 	}
 }
@@ -37,7 +37,7 @@ func TestMemoryCalculation_WithoutLoadedClassCount(t *testing.T) {
 	for _, o := range calc.ContributeOptions {
 		options = strings.ReplaceAll(options, o, "")
 	}
-	if options == " " {
+	if options == "" {
 		t.Errorf("Execute returned an empty string")
 	}
 }
