@@ -8,7 +8,7 @@ import (
 
 const (
 	EnvJavaToolOptions = "JAVA_TOOL_OPTIONS"
-	separator          = " "
+	OptionsSeparator   = " "
 )
 
 // ContributeOptions 固定要貢獻 jvm 的參數, 這些參數可能是 libjvm 在 build image 時加的而非計算出來的, 或是我們自己想要加上去的都可以放
@@ -26,7 +26,7 @@ func BuildJavaToolOptions() *JavaToolOptions {
 			if o == "" {
 				o = option
 			} else {
-				o += separator + option
+				o += OptionsSeparator + option
 			}
 		}
 	}
