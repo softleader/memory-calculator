@@ -8,7 +8,8 @@ import (
 
 func TestMemoryCalculation_WithLoadedClassCount(t *testing.T) {
 	calculator := calc.NewCalculator()
-	*calculator.LoadedClassCount = 1000
+	*calculator.ThreadCount = 10
+	*calculator.LoadedClassCount = 100
 
 	jto, err := calculator.Execute()
 	if err != nil {
@@ -27,8 +28,9 @@ func TestMemoryCalculation_WithLoadedClassCount(t *testing.T) {
 
 func TestMemoryCalculation_WithoutLoadedClassCount(t *testing.T) {
 	calculator := calc.NewCalculator()
+	*calculator.ThreadCount = 10
 	*calculator.AppPath = "."
-	*calculator.JVMClassCount = 1000
+	*calculator.JVMClassCount = 100
 	*calculator.JVMClassAdj = "10%"
 
 	jto, err := calculator.Execute()
