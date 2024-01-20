@@ -1,3 +1,5 @@
+[![Go Report Cart](https://goreportcard.com/badge/github.com/softleader/memory-calculator)](https://goreportcard.com/report/github.com/softleader/memory-calculator)
+
 # 記憶體計算工具（Memory Calculator）
 
 **記憶體計算工具** 是為了協助 Java
