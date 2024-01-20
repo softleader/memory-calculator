@@ -28,6 +28,10 @@ const (
 )
 
 type Calculator struct {
+	// MemoryLimitPath 一般情境不需要調整, 開出來是讓 test 時可以設定細節
+	MemoryLimitPath *MemoryLimitPath
+	//
+
 	JVMOptions       *JVMOptions
 	HeadRoom         *HeadRoom
 	ThreadCount      *ThreadCount
@@ -45,6 +49,7 @@ type Calculator struct {
 
 func NewCalculator() Calculator {
 	c := Calculator{
+		MemoryLimitPath:  NewMemoryLimitPath(),
 		JVMOptions:       NewJVMOptions(),
 		HeadRoom:         NewHeadRoom(),
 		ThreadCount:      NewThreadCount(),
@@ -123,8 +128,8 @@ func (c *Calculator) buildHelpers() (h map[string]sherpa.ExecD, err error) {
 		jh  = helper.JVMHeapDump{Logger: l}
 		m   = helper.MemoryCalculator{
 			Logger:            l,
-			MemoryLimitPathV1: helper.DefaultMemoryLimitPathV1, // cgroup v1 的記憶體上限路徑
-			MemoryLimitPathV2: helper.DefaultMemoryLimitPathV2, // cgroup v2 的記憶體上限路徑
+			MemoryLimitPathV1: c.MemoryLimitPath.V1,
+			MemoryLimitPathV2: c.MemoryLimitPath.V2,
 			MemoryInfoPath:    helper.DefaultMemoryInfoPath,
 		}
 		o  = helper.OpenSSLCertificateLoader{CertificateLoader: cl, Logger: l}
