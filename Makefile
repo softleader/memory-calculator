@@ -13,7 +13,7 @@ gofmt:	## Run gofmt
 	gofmt -s -w .
 
 test: ## Run tests
-	go test ./... -v
+	go test ./...
 
 build: bootstrap govet gofmt ## Build app
 	 go build -o ./build/memory-calculator

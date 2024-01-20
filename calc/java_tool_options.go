@@ -11,8 +11,8 @@ const (
 	separator          = " "
 )
 
-// 固定要加上的參數, 這些參數可能是 libjvm 在 build image 時加的而非計算出來的, 或是我們自己想要加上去的都可以放
-var contributeOptions = []string{"-XX:+ExitOnOutOfMemoryError"}
+// ContributeOptions 固定要貢獻 jvm 的參數, 這些參數可能是 libjvm 在 build image 時加的而非計算出來的, 或是我們自己想要加上去的都可以放
+var ContributeOptions = []string{"-XX:+ExitOnOutOfMemoryError"}
 
 type JavaToolOptions string
 
@@ -21,7 +21,7 @@ func BuildJavaToolOptions() *JavaToolOptions {
 	if val, ok := os.LookupEnv(EnvJavaToolOptions); ok {
 		o = val
 	}
-	for _, option := range contributeOptions {
+	for _, option := range ContributeOptions {
 		if !strings.Contains(o, option) {
 			if o == "" {
 				o = option
