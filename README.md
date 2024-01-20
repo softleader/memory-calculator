@@ -1,7 +1,9 @@
 [![Go Report Cart](https://goreportcard.com/badge/github.com/softleader/memory-calculator)](https://goreportcard.com/report/github.com/softleader/memory-calculator)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/softleader/memory-calculator)
 [![GitHub License](https://img.shields.io/github/license/softleader/memory-calculator)](./LICENSE)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/softleader/memory-calculator/test.yaml)](https://github.com/softleader/memory-calculator/actions)
 [![release](https://img.shields.io/github/release/softleader/memory-calculator.svg)](https://github.com/softleader/memory-calculator/releases)
+![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/softleader/memory-calculator/latest/total)
 
 # 記憶體計算工具（Memory Calculator）
 
