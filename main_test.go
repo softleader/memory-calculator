@@ -9,7 +9,7 @@ import (
 )
 
 func TestMemoryCalculation_WithLoadedClassCount(t *testing.T) {
-	// 避免在不同環境中, 計算出來的結果超過那個環境實際的記憶體, 進而造成測試錯誤, 所以這邊我們假裝有足夠大的記憶體
+	// 避免在不同環境中, 計算出來的結果超過那個環境實際的記憶體 (如 github ci), 進而造成測試錯誤, 所以這邊我們假裝有足夠大的記憶體
 	file, err := createTempFileWithContent("10g")
 	if err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
@@ -37,7 +37,7 @@ func TestMemoryCalculation_WithLoadedClassCount(t *testing.T) {
 }
 
 func TestMemoryCalculation_WithoutLoadedClassCount(t *testing.T) {
-	// 避免在不同環境中, 計算出來的結果超過那個環境實際的記憶體, 進而造成測試錯誤, 所以這邊我們假裝有足夠大的記憶體
+	// 避免在不同環境中, 計算出來的結果超過那個環境實際的記憶體 (如 github ci), 進而造成測試錯誤, 所以這邊我們假裝有足夠大的記憶體
 	file, err := createTempFileWithContent("10g")
 	if err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
