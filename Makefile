@@ -12,9 +12,9 @@ govet:	## Run go vet
 gofmt:	## Run gofmt
 	gofmt -s -w .
 
-test: ## Run tests
+test: bootstrap govet gofmt ## Run tests
 	go test ./...
 
-build: bootstrap govet gofmt ## Build app
+build: test ## Build app
 	 go build -o ./build/memory-calculator
 
