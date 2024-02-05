@@ -30,7 +30,7 @@ jobs:
           echo "version=$(go list -m -f '{{.Version}}' github.com/paketo-buildpacks/libjvm)" >> "$GITHUB_OUTPUT"
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         # 請參考 https://github.com/peter-evans/create-pull-request 以獲得更詳盡的說明
         with:
           commit-message: "chore: bump libjvm from ${{ steps.current-version.outputs.version }} to ${{ steps.latest-version.outputs.version }}"
