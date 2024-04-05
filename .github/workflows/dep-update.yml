@@ -1,0 +1,39 @@
+name: dep-update
+
+on:
+  # 手動觸發，可做用於任一 branch
+  workflow_dispatch:
+  # 排程觸發，只做用於 default branch
+  schedule:
+    - cron: "0 0 * * 1" # In UTC time, 格式請參考: https://crontab.guru/
+
+jobs:
+  dep-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+      - name: Update dependencies
+        run: go get -t -u ./...
+      - name: Tidy
+        run: go mod tidy
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        # 請參考 https://github.com/peter-evans/create-pull-request 以獲得更詳盡的說明
+        with:
+          commit-message: "chore: update dependencies"
+          title: "chore: update dependencies"
+          committer: bot <bot-noreply@softleader.com.tw>
+          author: bot <bot-noreply@softleader.com.tw>
+          body: >-
+            chore: update dependencies
+          labels: "dependencies-update"
+          branch: "dep-update/${{ github.ref_name }}"
+          delete-branch: true
+      - name: Enable Auto-merge
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        run: gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
