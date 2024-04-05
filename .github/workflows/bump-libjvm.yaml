@@ -9,7 +9,7 @@ on:
 
 jobs:
   bump-libjvm:
-    runs-on: [self-hosted, ubuntu-jammy]
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write

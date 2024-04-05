@@ -11,7 +11,7 @@ permissions:
 jobs:
   releases-matrix:
     name: release binary
-    runs-on: [self-hosted, ubuntu-jammy]
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         goos: [ linux, darwin ]
