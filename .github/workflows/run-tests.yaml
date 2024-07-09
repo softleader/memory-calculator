@@ -21,3 +21,11 @@ jobs:
         run: go build -v ./...
       - name: Test with the Go CLI
         run: go test ./...
+
+  keepalive:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gautamkrishnar/keepalive-workflow@v2
