@@ -32,7 +32,7 @@ jobs:
           body: >-
             chore: update dependencies
           labels: "dependencies-update"
-          branch: "${{ github.ref_name }}/dep-update/${{ github.run_id }}"
+          branch: "dep-update/${{ github.ref_name }}/${{ github.run_id }}"
           delete-branch: true
       - name: Enable Auto-merge
         if: steps.cpr.outputs.pull-request-operation == 'created'
