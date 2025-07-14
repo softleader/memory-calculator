@@ -94,7 +94,7 @@ memory-calculator -h
 
 ## 開發前準備
 
-- Golang: v1.22+
+- Golang: v1.24+
 - Jib ContainerTool
 - Linux 基礎映像
 
