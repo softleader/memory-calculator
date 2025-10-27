@@ -20,6 +20,14 @@ jobs:
         run: go get -t -u ./...
       - name: Tidy
         run: go mod tidy
+      - name: Git Diff
+        id: git-diff
+        run: |
+          git diff > /tmp/diff.log
+          echo "sha=$(cat /tmp/diff.log | sha256sum | head -c 12)" >> $GITHUB_OUTPUT
+          echo '```diff' > /tmp/diff.md
+          cat /tmp/diff.log >> /tmp/diff.md
+          echo '```' >> /tmp/diff.md
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v7
@@ -32,7 +40,7 @@ jobs:
           body: >-
             chore: update dependencies
           labels: "dependencies-update"
-          branch: "dep-update/${{ github.ref_name }}/${{ github.run_id }}"
+          branch: "bot/${{ github.ref_name }}/bump-deps-${{ steps.git-diff.outputs.sha }}"
           delete-branch: true
       - name: Enable Auto-merge
         if: steps.cpr.outputs.pull-request-operation == 'created'
