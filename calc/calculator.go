@@ -7,6 +7,7 @@ import (
 	"github.com/paketo-buildpacks/libjvm/helper"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/sherpa"
+	bootHelper "github.com/paketo-buildpacks/spring-boot/v5/helper"
 	"os"
 	"strings"
 )
@@ -25,6 +26,8 @@ const (
 	helperJmx                         = "jmx"
 	helperNmt                         = "nmt"
 	helperJfr                         = "jfr"
+	helperBootPerformance             = "boot-performance"
+	helperBootSpringCloudBindings     = "boot-spring-cloud-bindings"
 )
 
 type Calculator struct {
@@ -90,6 +93,8 @@ func (c *Calculator) Execute() (*JavaToolOptions, error) {
 		helperJmx,
 		helperNmt,
 		helperJfr,
+		helperBootPerformance,
+		helperBootSpringCloudBindings,
 	}
 
 	// 按照指定順序執行
@@ -132,12 +137,14 @@ func (c *Calculator) buildHelpers() (h map[string]sherpa.ExecD, err error) {
 			MemoryLimitPathV2: c.MemoryLimitPath.V2,
 			MemoryInfoPath:    helper.DefaultMemoryInfoPath,
 		}
-		o  = helper.OpenSSLCertificateLoader{CertificateLoader: cl, Logger: l}
-		s9 = helper.SecurityProvidersClasspath9{Logger: l}
-		d9 = helper.Debug9{Logger: l}
-		jm = helper.JMX{Logger: l}
-		n  = helper.NMT{Logger: l}
-		jf = helper.JFR{Logger: l}
+		o    = helper.OpenSSLCertificateLoader{CertificateLoader: cl, Logger: l}
+		s9   = helper.SecurityProvidersClasspath9{Logger: l}
+		d9   = helper.Debug9{Logger: l}
+		jm   = helper.JMX{Logger: l}
+		n    = helper.NMT{Logger: l}
+		jf   = helper.JFR{Logger: l}
+		bp   = bootHelper.SpringPerformance{Logger: l}
+		bscb = bootHelper.SpringCloudBindings{Logger: l}
 	)
 
 	file := "/etc/resolv.conf"
@@ -159,6 +166,8 @@ func (c *Calculator) buildHelpers() (h map[string]sherpa.ExecD, err error) {
 		helperJmx:                         jm,
 		helperNmt:                         n,
 		helperJfr:                         jf,
+		helperBootPerformance:             bp,
+		helperBootSpringCloudBindings:     bscb,
 	}
 	// 底層的實作中要求若開啟 jvm-cacert 則必須要設定相關的系統參數, 否則會報錯, 所以針對這個改成沒設定就不要跑了
 	if *c.JVMCacerts == "" {
