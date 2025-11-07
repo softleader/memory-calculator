@@ -42,7 +42,7 @@ func testPreparerManager(t *testing.T, context spec.G, it spec.S) {
 
 		logger = bard.NewLogger(io.Discard)
 
-		// Clean up all environment variables that could be modified
+		// CRITICAL: Clean up all environment variables before each test.
 		Expect(os.Unsetenv("JAVA_HOME")).To(Succeed())
 		Expect(os.Unsetenv("BPI_JVM_SECURITY_PROVIDERS")).To(Succeed())
 		Expect(os.Unsetenv("JAVA_TOOL_OPTIONS")).To(Succeed())
@@ -50,7 +50,7 @@ func testPreparerManager(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it.After(func() {
-		// Clean up all environment variables after each test
+		// CRITICAL: Clean up all environment variables after each test to prevent pollution.
 		Expect(os.Unsetenv("JAVA_HOME")).To(Succeed())
 		Expect(os.Unsetenv("BPI_JVM_SECURITY_PROVIDERS")).To(Succeed())
 		Expect(os.Unsetenv("JAVA_TOOL_OPTIONS")).To(Succeed())
@@ -98,8 +98,8 @@ func testPreparerManager(t *testing.T, context spec.G, it spec.S) {
 			// The Jre preparer also tries to add -Djava.security.properties, let's check it's not duplicated
 			// Note: This assertion depends on the exact (and somewhat flawed) implementation of jre.go
 			jreJspPath := filepath.Join(javaHome, "conf", "security", "java.security")
-			Expect(strings.Count(opts, "-Djava.security.properties=")).To(Equal(2)) // It will be duplicated due to the current implementation
 			Expect(opts).To(ContainSubstring("-Djava.security.properties=" + jreJspPath))
+			Expect(strings.Count(opts, "-Djava.security.properties=")).To(Equal(2))
 		})
 	})
 }
