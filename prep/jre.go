@@ -10,7 +10,6 @@ import (
 	"github.com/magiconair/properties"
 	"github.com/mattn/go-shellwords"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/libpak/sherpa"
 	"golang.org/x/sys/unix"
 )
 
@@ -54,9 +53,6 @@ func (jre Jre) Prepare() error {
 	if err := os.Setenv("BPI_JVM_SECURITY_PROVIDERS", strings.Join(providers, " ")); err != nil {
 		return err
 	}
-
-	sherpa.AppendToEnvVar("JAVA_TOOL_OPTIONS", " ",
-		fmt.Sprintf("-Djava.security.properties=%s", file))
 
 	var values []string
 	s, ok := os.LookupEnv("JAVA_TOOL_OPTIONS")

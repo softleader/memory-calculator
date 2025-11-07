@@ -1,11 +1,13 @@
 package main
 
 import (
-	"github.com/softleader/memory-calculator/calc"
 	"io"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/softleader/memory-calculator/calc"
 )
 
 func TestMemoryCalculation_WithLoadedClassCount(t *testing.T) {
@@ -16,7 +18,7 @@ func TestMemoryCalculation_WithLoadedClassCount(t *testing.T) {
 	}
 	defer os.Remove(file.Name())
 
-	calculator := calc.NewCalculator()
+	calculator := calc.NewCalculator(bard.NewLogger(io.Discard))
 	calculator.MemoryLimitPath.V1 = file.Name()
 	*calculator.ThreadCount = 10
 	*calculator.LoadedClassCount = 100
@@ -44,7 +46,7 @@ func TestMemoryCalculation_WithoutLoadedClassCount(t *testing.T) {
 	}
 	defer os.Remove(file.Name())
 
-	calculator := calc.NewCalculator()
+	calculator := calc.NewCalculator(bard.NewLogger(io.Discard))
 	calculator.MemoryLimitPath.V1 = file.Name()
 	*calculator.ThreadCount = 10
 	*calculator.AppPath = "."

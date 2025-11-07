@@ -1,7 +1,6 @@
 package prep_test
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -100,7 +99,7 @@ some.other.property=value
 		})
 
 		context("when all conditions are met", func() {
-			it("sets BPI_JVM_SECURITY_PROVIDERS and JAVA_TOOL_OPTIONS", func() {
+			it("sets BPI_JVM_SECURITY_PROVIDERS and appends to JAVA_TOOL_OPTIONS", func() {
 				jsp := prep.NewJrePreparer(logger)
 				Expect(jsp.Prepare()).To(Succeed())
 
@@ -108,8 +107,6 @@ some.other.property=value
 				Expect(os.Getenv("BPI_JVM_SECURITY_PROVIDERS")).To(Equal("1|SunProvider 2|BouncyCastleProvider"))
 
 				// Verify JAVA_TOOL_OPTIONS
-				expectedJavaSecurityProp := fmt.Sprintf("-Djava.security.properties=%s", filepath.Join(javaHome, "conf", "security", "java.security"))
-				Expect(os.Getenv("JAVA_TOOL_OPTIONS")).To(ContainSubstring(expectedJavaSecurityProp))
 				Expect(os.Getenv("JAVA_TOOL_OPTIONS")).To(ContainSubstring("-XX:+ExitOnOutOfMemoryError"))
 			})
 
