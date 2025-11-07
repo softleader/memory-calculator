@@ -2,13 +2,14 @@ package calc
 
 import (
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/miekg/dns"
 	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libjvm/helper"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/sherpa"
-	"os"
-	"strings"
 )
 
 const (
@@ -28,6 +29,7 @@ const (
 )
 
 type Calculator struct {
+	Logger bard.Logger
 	// MemoryLimitPath 一般情境不需要調整, 開出來是讓 test 時可以設定細節
 	MemoryLimitPath *MemoryLimitPath
 	//
@@ -47,8 +49,9 @@ type Calculator struct {
 	Verbose          *Verbose
 }
 
-func NewCalculator() Calculator {
+func NewCalculator(logger bard.Logger) Calculator {
 	c := Calculator{
+		Logger:           logger,
 		MemoryLimitPath:  NewMemoryLimitPath(),
 		JVMOptions:       NewJVMOptions(),
 		HeadRoom:         NewHeadRoom(),
@@ -118,7 +121,7 @@ func (c *Calculator) Execute() (*JavaToolOptions, error) {
 // https://github.com/paketo-buildpacks/libjvm/blob/main/build.go#L274
 func (c *Calculator) buildHelpers() (h map[string]sherpa.ExecD, err error) {
 	var (
-		l  = bard.NewLogger(os.Stdout)
+		l  = c.Logger
 		cl = libjvm.NewCertificateLoader()
 
 		a   = helper.ActiveProcessorCount{Logger: l}

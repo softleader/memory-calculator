@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/softleader/memory-calculator/calc"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/softleader/memory-calculator/calc"
+	"github.com/softleader/memory-calculator/prep"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -37,14 +40,18 @@ var version = "<unknown>"
 type config struct {
 	output  string
 	version bool
+	logger  bard.Logger
 	calc    calc.Calculator
+	prep    prep.PreparerManager
 }
 
 func main() {
+	logger := bard.NewLogger(os.Stdout)
 	c := config{
 		version: false,
 		output:  "",
-		calc:    calc.NewCalculator(),
+		calc:    calc.NewCalculator(logger),
+		prep:    prep.NewPreparerManager(logger),
 	}
 	cmd := &cobra.Command{
 		Use:          "memory-calculator",
@@ -81,6 +88,12 @@ func run(c config) error {
 		fmt.Println(version)
 		return nil
 	}
+
+	// Execute all prep steps via the single coordinator
+	if err := c.prep.PrepareAll(); err != nil {
+		return err
+	}
+
 	j, err := c.calc.Execute()
 	if err != nil {
 		return err
