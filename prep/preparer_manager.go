@@ -29,7 +29,7 @@ func NewPreparerManager(logger bard.Logger) PreparerManager {
 }
 
 // Prepare executes all registered preparation steps in order.
-func (p PreparerManager) Prepare() error {
+func (p PreparerManager) PrepareAll() error {
 	for i, step := range p.Preparers {
 		if err := step.Prepare(); err != nil {
 			return fmt.Errorf("failed to run preparer step %d: %w", i+1, err)

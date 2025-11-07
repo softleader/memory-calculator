@@ -54,7 +54,7 @@ func testPreparerManager(t *testing.T, context spec.G, it spec.S) {
 				},
 			}
 
-			Expect(pm.Prepare()).To(Succeed())
+			Expect(pm.PrepareAll()).To(Succeed())
 
 			// Verify the execution order
 			Expect(*callOrder).To(Equal([]string{"first", "second"}))
@@ -75,7 +75,7 @@ func testPreparerManager(t *testing.T, context spec.G, it spec.S) {
 				},
 			}
 
-			Expect(pm.Prepare()).To(MatchError(ContainSubstring("preparer failed")))
+			Expect(pm.PrepareAll()).To(MatchError(ContainSubstring("preparer failed")))
 
 			// Verify that execution stopped after the failing preparer
 			Expect(*callOrder).To(Equal([]string{"first", "second"}))
