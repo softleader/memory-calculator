@@ -2,6 +2,7 @@ package prep
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/paketo-buildpacks/libpak/bard"
 )
@@ -30,6 +31,13 @@ func NewPreparerManager(logger bard.Logger) PreparerManager {
 
 // Prepare executes all registered preparation steps in order.
 func (p PreparerManager) PrepareAll() error {
+	s, ok := os.LookupEnv("JAVA_TOOL_OPTIONS")
+	if ok {
+		p.Logger.Infof("Found JAVA_TOOL_OPTIONS: %s", s)
+	} else {
+		p.Logger.Info("JAVA_TOOL_OPTIONS not found")
+	}
+
 	for i, step := range p.Preparers {
 		if err := step.Prepare(); err != nil {
 			return fmt.Errorf("failed to run preparer step %d: %w", i+1, err)
