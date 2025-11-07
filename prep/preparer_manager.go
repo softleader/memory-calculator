@@ -10,28 +10,27 @@ const (
 	DefaultJavaSecurityPropertiesPath = "/tmp"
 )
 
+// PreparerManager is a coordinator for all preparation steps.
 type PreparerManager struct {
-	Logger            bard.Logger
-	JavaSecurityProps JavaSecurityProperties
-	Jre               Jre
+	Logger    bard.Logger
+	Preparers []Preparer
 }
 
+// NewPreparerManager creates a new instance of the PreparerManager coordinator,
+// and populates it with the default, ordered list of preparers.
 func NewPreparerManager(logger bard.Logger) PreparerManager {
-	pm := PreparerManager{
-		Logger:            logger,
-		JavaSecurityProps: NewJavaSecurityProperties(logger, DefaultJavaSecurityPropertiesPath),
-		Jre:               NewJrePreparer(logger),
+	return PreparerManager{
+		Logger: logger,
+		Preparers: []Preparer{
+			NewJavaSecurityProperties(logger, DefaultJavaSecurityPropertiesPath),
+			NewJrePreparer(logger),
+		},
 	}
-	return pm
 }
 
-func (p PreparerManager) PrepareAll() error {
-	steps := []Preparer{
-		p.JavaSecurityProps,
-		p.Jre,
-	}
-
-	for i, step := range steps {
+// Prepare executes all registered preparation steps in order.
+func (p PreparerManager) Prepare() error {
+	for i, step := range p.Preparers {
 		if err := step.Prepare(); err != nil {
 			return fmt.Errorf("failed to run preparer step %d: %w", i+1, err)
 		}
