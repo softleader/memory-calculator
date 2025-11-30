@@ -58,8 +58,10 @@ Non-Heap = Direct Memory + Metaspace + Reserved Code Cache + (Thread Stack * Thr
 | 運行時的用戶線程數 | `--thread-count` | `$BPL_JVM_THREAD_COUNT` | `200` |
 | 運行時將加載的 class 數量 | `--loaded-class-count` | `$BPL_JVM_LOADED_CLASS_COUNT` | 若沒提供，則以 App 目錄，JVM class 數量，JVM class 數量調整，於啟動時動態的計算出建議值 |
 | App 目錄 | `--app-path` | `$BPI_APPLICATION_PATH` | `/app` |
+| App classes 目錄 | `--app-classes-path` | `$APPLICATION_CLASSES_PATH` | `/app/classes` |
+| App lib 目錄 | `--app-lib-path` | `$APPLICATION_LIB_PATH` | `/app/libs` |
 | JVM class 數量 | `--jvm-class-count` | `$BPI_JVM_CLASS_COUNT` | 若沒提供，則動態計算 `$JAVA_HOME` 下的 class 數量 |
-| JVM class 數量調整 | `--jvm-class-adj` | `$BPL_JVM_CLASS_ADJUSTMENT` |  無，可接受數字 (`1000`) 或百分比 (`150%`) |
+| JVM class 數量調整 | `--jvm-class-adj` | `$BPL_JVM_CLASS_ADJUSTMENT` | 無，可接受數字 (`1000`) 或百分比 (`150%`) |
 | JVM CA 目錄 | `--jvm-cacerts` | `$BPI_JVM_CACERTS` | 若沒提供，則試著使用 `$JAVA_HOME/lib/security/cacerts` |
 | Java 啟動參數 | `--jvm-options` | `$JAVA_OPTS` | |
 | 是否啟用 [JDWP](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/introclientissues005.html) | `--enable-jdwp` | `$BPL_DEBUG_ENABLED` | `true` |
@@ -97,4 +99,3 @@ memory-calculator -h
 - Golang: v1.24+
 - Jib ContainerTool
 - Linux 基礎映像
-
