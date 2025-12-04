@@ -11,6 +11,9 @@ type WebApplicationType struct {
 	Logger bard.Logger
 }
 
+// Reference implementation from:
+// "Paketo Buildpack for Spring Boot"
+// https://github.com/paketo-buildpacks/spring-boot/blob/main/boot/web_application_type.go
 func (wat WebApplicationType) Execute() (map[string]string, error) {
 	webAppType, err := ResolveWebAppType()
 	if err != nil {
