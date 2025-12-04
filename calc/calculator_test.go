@@ -1,7 +1,10 @@
 package calc
 
 import (
+	"io"
 	"testing"
+
+	"github.com/paketo-buildpacks/libpak/bard"
 )
 
 type MockContributor struct {
@@ -27,7 +30,7 @@ func TestCalculator_Contribute(t *testing.T) {
 }
 
 func TestCalculator_buildHelpers_HasCaCerts(t *testing.T) {
-	calculator := NewCalculator()
+	calculator := NewCalculator(bard.NewLogger(io.Discard))
 	calculator.JVMCacerts.Set("some-value")
 
 	helpers, err := calculator.buildHelpers()
@@ -41,7 +44,7 @@ func TestCalculator_buildHelpers_HasCaCerts(t *testing.T) {
 }
 
 func TestCalculator_buildHelpers_NoCaCerts(t *testing.T) {
-	calculator := NewCalculator()
+	calculator := NewCalculator(bard.NewLogger(io.Discard))
 
 	helpers, err := calculator.buildHelpers()
 	if err != nil {
@@ -54,7 +57,7 @@ func TestCalculator_buildHelpers_NoCaCerts(t *testing.T) {
 }
 
 func TestCalculator_buildHelpers_EnableNmt(t *testing.T) {
-	calculator := NewCalculator()
+	calculator := NewCalculator(bard.NewLogger(io.Discard))
 	*calculator.EnableNmt = true
 
 	helpers, err := calculator.buildHelpers()
@@ -68,7 +71,7 @@ func TestCalculator_buildHelpers_EnableNmt(t *testing.T) {
 }
 
 func TestCalculator_buildHelpers_DisableNmt(t *testing.T) {
-	calculator := NewCalculator()
+	calculator := NewCalculator(bard.NewLogger(io.Discard))
 	*calculator.EnableNmt = false
 
 	helpers, err := calculator.buildHelpers()

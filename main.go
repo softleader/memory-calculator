@@ -2,9 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/softleader/memory-calculator/calc"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/softleader/memory-calculator/boot"
+	"github.com/softleader/memory-calculator/calc"
+	"github.com/softleader/memory-calculator/prep"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -37,14 +41,20 @@ var version = "<unknown>"
 type config struct {
 	output  string
 	version bool
+	logger  bard.Logger
+	prep    prep.PreparerManager
+	boot    boot.SpringOptimizer
 	calc    calc.Calculator
 }
 
 func main() {
+	logger := bard.NewLogger(os.Stdout)
 	c := config{
 		version: false,
 		output:  "",
-		calc:    calc.NewCalculator(),
+		prep:    prep.NewPreparerManager(logger),
+		boot:    boot.NewSpringOptimizer(logger),
+		calc:    calc.NewCalculator(logger),
 	}
 	cmd := &cobra.Command{
 		Use:          "memory-calculator",
@@ -69,6 +79,8 @@ func main() {
 	f.Var(c.calc.EnableJmx, calc.FlagEnableJmx, calc.UsageEnableJmx)
 	f.Var(c.calc.EnableJdwp, calc.FlagEnableJdwp, calc.UsageEnableJdwp)
 	f.VarP(c.calc.Verbose, calc.FlagVerbose, calc.FlagShortVerbose, calc.UsageVerbose)
+	f.Var(c.boot.AppClassesPath, boot.FlagAppClassesPath, boot.UsageAppClassesPath)
+	f.Var(c.boot.AppLibPath, boot.FlagAppLibPath, boot.UsageAppLibPath)
 	f.StringVarP(&c.output, "output", "o", c.output, "write to a file, instead of STDOUT")
 	f.BoolVar(&c.version, "version", c.version, "print version and exit")
 	if err := cmd.Execute(); err != nil {
@@ -81,6 +93,15 @@ func run(c config) error {
 		fmt.Println(version)
 		return nil
 	}
+
+	if err := c.prep.PrepareAll(); err != nil {
+		return err
+	}
+
+	if err := c.boot.Execute(); err != nil {
+		return err
+	}
+
 	j, err := c.calc.Execute()
 	if err != nil {
 		return err
