@@ -23,7 +23,7 @@ builds:
 
 archives:
   - name_template: "{{ .Os }}-{{ .Arch }}"
-    format: zip
+    formats: [ 'zip' ]
     files:
       - entrypoint.sh
 
@@ -31,7 +31,7 @@ checksum:
   name_template: 'checksums.txt'
 
 snapshot:
-  name_template: "{{ .Version }}-next"
+  version_template: "{{ .Version }}-next"
 
 changelog:
   sort: asc
