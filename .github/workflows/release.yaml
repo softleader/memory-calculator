@@ -9,24 +9,23 @@ permissions:
   packages: write
 
 jobs:
-  releases-matrix:
+  goreleaser:
     name: release binary
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        goos: [ linux, darwin ]
-        goarch: [ amd64, arm64 ]
     steps:
-      - uses: actions/checkout@v6
-      - uses: wangyoucao577/go-release-action@v1
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          github_token: ${{ github.token }}
-          goos: ${{ matrix.goos }}
-          goarch: ${{ matrix.goarch }}
-          goversion: 1.24
-          pre_command: go test ./... && export CGO_ENABLED=0
-          ldflags: -s -w -X main.version=${{ github.event.release.tag_name }}
-          binary_name: memory-calculator
-          extra_files: entrypoint.sh
-          asset_name: ${{ matrix.goos }}-${{ matrix.goarch }}
-          compress_assets: zip
+          # Fetch all history for all tags and branches
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
