@@ -84,7 +84,7 @@ func main() {
 	f.Var(c.boot.AppLibPath, boot.FlagAppLibPath, boot.UsageAppLibPath)
 	f.StringVarP(&c.output, "output", "o", c.output, "write to a file, instead of STDOUT")
 	f.BoolVar(&c.version, "version", c.version, "print version and exit")
-	f.BoolVar(&c.enablePreview, "enable-preview", c.enablePreview, "Enable preview features")
+	f.BoolVar(&c.enablePreview, "enable-preview", c.enablePreview, "enables preview features")
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
 	}
