@@ -28,7 +28,7 @@ func (jsp JavaSecurityProperties) Prepare() error {
 	if pathFromToolOptions, found, err := findJavaSecurityProperties("JAVA_TOOL_OPTIONS"); err != nil {
 		return err
 	} else if found {
-		jsp.Logger.Infof("Found '-Djava.security.properties=' in 'JAVA_TOOL_OPTIONS', setting JAVA_SECURITY_PROPERTIES.")
+		jsp.Logger.Debugf("Found '-Djava.security.properties=' in 'JAVA_TOOL_OPTIONS', setting JAVA_SECURITY_PROPERTIES.")
 		if err := os.Setenv("JAVA_SECURITY_PROPERTIES", pathFromToolOptions); err != nil {
 			return fmt.Errorf("unable to set JAVA_SECURITY_PROPERTIES from JAVA_TOOL_OPTIONS: %w", err)
 		}
@@ -42,7 +42,7 @@ func (jsp JavaSecurityProperties) Prepare() error {
 
 	defaultFilePath := filepath.Join(jsp.Path, "java-security.properties")
 
-	jsp.Logger.Infof("No '-Djava.security.properties=' found in 'JAVA_TOOL_OPTIONS', creating default at %s.", defaultFilePath)
+	jsp.Logger.Debugf("No '-Djava.security.properties=' found in 'JAVA_TOOL_OPTIONS', creating default at %s.", defaultFilePath)
 
 	if err := os.WriteFile(defaultFilePath, []byte{}, 0644); err != nil {
 		return fmt.Errorf("unable to create default security properties file at %s: %w", defaultFilePath, err)
