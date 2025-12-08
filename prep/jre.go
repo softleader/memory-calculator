@@ -10,7 +10,7 @@ import (
 	"github.com/magiconair/properties"
 	"github.com/mattn/go-shellwords"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"golang.org/x/sys/unix"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
 type Jre struct {
@@ -33,8 +33,12 @@ func (jre Jre) Prepare() error {
 	}
 
 	cacertsPath = filepath.Join(envJavaHome, "lib", "security", "cacerts")
-	if unix.Access(cacertsPath, unix.W_OK) != nil {
-		return fmt.Errorf("unable to load write\n%s", cacertsPath)
+	ok, err := sherpa.FileExists(cacertsPath)
+	if !ok || err != nil {
+		cacertsPath = ""
+	}
+	if err := os.Setenv("BPI_JVM_CACERTS", cacertsPath); err != nil {
+		return err
 	}
 
 	var file = filepath.Join(envJavaHome, "conf", "security", "java.security")

@@ -35,9 +35,6 @@ func testJrePreparer(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.MkdirAll(filepath.Join(javaHome, "lib", "security"), 0755)).To(Succeed())
 		Expect(os.MkdirAll(filepath.Join(javaHome, "conf", "security"), 0755)).To(Succeed())
 
-		// Create a dummy cacerts file (permissions will be an issue on Windows for unix.Access)
-		Expect(os.WriteFile(filepath.Join(javaHome, "lib", "security", "cacerts"), []byte{}, 0644)).To(Succeed())
-
 		// Create a dummy java.security file
 		javaSecurityContent := `
 security.provider.1=SunProvider
@@ -50,6 +47,7 @@ some.other.property=value
 
 		// Clean up environment variables before each test
 		Expect(os.Unsetenv("JAVA_HOME")).To(Succeed())
+		Expect(os.Unsetenv("BPI_JVM_CACERTS")).To(Succeed())
 		Expect(os.Unsetenv("BPI_JVM_SECURITY_PROVIDERS")).To(Succeed())
 		Expect(os.Unsetenv("JAVA_TOOL_OPTIONS")).To(Succeed())
 	})
@@ -57,6 +55,7 @@ some.other.property=value
 	it.After(func() {
 		// Clean up environment variables after each test
 		Expect(os.Unsetenv("JAVA_HOME")).To(Succeed())
+		Expect(os.Unsetenv("BPI_JVM_CACERTS")).To(Succeed())
 		Expect(os.Unsetenv("BPI_JVM_SECURITY_PROVIDERS")).To(Succeed())
 		Expect(os.Unsetenv("JAVA_TOOL_OPTIONS")).To(Succeed())
 		Expect(os.RemoveAll(tempDir)).To(Succeed())
@@ -74,16 +73,11 @@ some.other.property=value
 			Expect(os.Setenv("JAVA_HOME", javaHome)).To(Succeed())
 		})
 
-		context("when cacerts is not writable", func() {
-			it.Before(func() {
-				// Make cacerts unwritable (this will likely fail on Windows)
-				Expect(os.Chmod(filepath.Join(javaHome, "lib", "security", "cacerts"), 0444)).To(Succeed())
-			})
-
-			it("returns an error", func() {
-				// This test will likely fail on Windows due to unix.Access
+		context("when cacerts file is missing", func() {
+			it("sets BPI_JVM_CACERTS to an empty string", func() {
 				jsp := prep.NewJrePreparer(logger)
-				Expect(jsp.Prepare()).To(MatchError(ContainSubstring("unable to load write")))
+				Expect(jsp.Prepare()).To(Succeed())
+				Expect(os.Getenv("BPI_JVM_CACERTS")).To(BeEmpty())
 			})
 		})
 
@@ -99,9 +93,17 @@ some.other.property=value
 		})
 
 		context("when all conditions are met", func() {
-			it("sets BPI_JVM_SECURITY_PROVIDERS and appends to JAVA_TOOL_OPTIONS", func() {
+			it.Before(func() {
+				// Create a dummy cacerts file
+				Expect(os.WriteFile(filepath.Join(javaHome, "lib", "security", "cacerts"), []byte{}, 0644)).To(Succeed())
+			})
+
+			it("sets BPI_JVM_CACERTS, BPI_JVM_SECURITY_PROVIDERS and appends to JAVA_TOOL_OPTIONS", func() {
 				jsp := prep.NewJrePreparer(logger)
 				Expect(jsp.Prepare()).To(Succeed())
+
+				// Verify BPI_JVM_CACERTS
+				Expect(os.Getenv("BPI_JVM_CACERTS")).To(Equal(filepath.Join(javaHome, "lib", "security", "cacerts")))
 
 				// Verify BPI_JVM_SECURITY_PROVIDERS
 				Expect(os.Getenv("BPI_JVM_SECURITY_PROVIDERS")).To(Equal("1|SunProvider 2|BouncyCastleProvider"))
