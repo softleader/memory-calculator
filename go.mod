@@ -13,8 +13,8 @@ require (
 	github.com/paketo-buildpacks/libpak v1.73.0
 	github.com/paketo-buildpacks/spring-boot/v5 v5.33.5
 	github.com/sclevine/spec v1.4.0
-	github.com/spf13/cobra v1.10.1
-	golang.org/x/sys v0.37.0
+	github.com/spf13/cobra v1.10.2
+	golang.org/x/sys v0.38.0
 )
 
 require (
@@ -36,12 +36,12 @@ require (
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.43.0 // indirect
-	golang.org/x/mod v0.29.0 // indirect
-	golang.org/x/net v0.46.0 // indirect
-	golang.org/x/sync v0.17.0 // indirect
-	golang.org/x/text v0.30.0 // indirect
-	golang.org/x/tools v0.38.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/mod v0.30.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/sync v0.18.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/tools v0.39.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	software.sslmate.com/src/go-pkcs12 v0.6.0 // indirect
 )
