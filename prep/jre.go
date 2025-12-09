@@ -10,7 +10,6 @@ import (
 	"github.com/magiconair/properties"
 	"github.com/mattn/go-shellwords"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
 type Jre struct {
@@ -25,24 +24,12 @@ func NewJrePreparer(logger bard.Logger) Jre {
 }
 
 func (jre Jre) Prepare() error {
-	var cacertsPath string
-
 	envJavaHome, ok := os.LookupEnv("JAVA_HOME")
 	if !ok {
 		return fmt.Errorf("JAVA_HOME not set")
 	}
 
-	cacertsPath = filepath.Join(envJavaHome, "lib", "security", "cacerts")
-	ok, err := sherpa.FileExists(cacertsPath)
-	if !ok || err != nil {
-		cacertsPath = ""
-	}
-	if err := os.Setenv("BPI_JVM_CACERTS", cacertsPath); err != nil {
-		return err
-	}
-
 	var file = filepath.Join(envJavaHome, "conf", "security", "java.security")
-
 	p, err := properties.LoadFile(file, properties.UTF8)
 	if err != nil {
 		return fmt.Errorf("unable to read properties file %s\n%w", file, err)
