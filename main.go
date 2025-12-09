@@ -39,12 +39,13 @@ Examples:
 var version = "<unknown>"
 
 type config struct {
-	output  string
-	version bool
-	logger  bard.Logger
-	prep    prep.PreparerManager
-	boot    boot.SpringOptimizer
-	calc    calc.Calculator
+	output        string
+	version       bool
+	logger        bard.Logger
+	prep          prep.PreparerManager
+	boot          boot.SpringOptimizer
+	calc          calc.Calculator
+	enablePreview bool
 }
 
 func main() {
@@ -83,6 +84,7 @@ func main() {
 	f.Var(c.boot.AppLibPath, boot.FlagAppLibPath, boot.UsageAppLibPath)
 	f.StringVarP(&c.output, "output", "o", c.output, "write to a file, instead of STDOUT")
 	f.BoolVar(&c.version, "version", c.version, "print version and exit")
+	f.BoolVar(&c.enablePreview, "enable-preview", c.enablePreview, "enables preview features")
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
 	}
@@ -94,12 +96,14 @@ func run(c config) error {
 		return nil
 	}
 
-	if err := c.prep.PrepareAll(); err != nil {
-		return err
-	}
+	if c.enablePreview {
+		if err := c.prep.PrepareAll(); err != nil {
+			return err
+		}
 
-	if err := c.boot.Execute(); err != nil {
-		return err
+		if err := c.boot.Execute(); err != nil {
+			return err
+		}
 	}
 
 	j, err := c.calc.Execute()

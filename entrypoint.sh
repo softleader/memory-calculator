@@ -23,7 +23,8 @@ execute_memory_calculator() {
 
   local bin_path=$1
   local debug=$2
-  $bin_path/memory-calculator -o="$TMP_ENV" -v="$debug" || {
+  local enablePreview=$3
+  $bin_path/memory-calculator -o="$TMP_ENV" -v="$debug" --enable-preview="$enablePreview" || {
     echo "Memory calculator failed (version: $($bin_path/memory-calculator --version))";
     exit 1;
   }
@@ -33,10 +34,11 @@ execute_memory_calculator() {
 }
 
 DEBUG="${MEM_CALC_DEBUG:-false}"
+ENABLE_PREVIEW="${MEM_CALC_ENABLE_PREVIEW:-false}"
 BIN="${MEM_CALC_HOME:-$DEFAULT_BIN_PATH}"
 JVM_FLAGS=$(read_jvm_flags)
 
-execute_memory_calculator "$BIN" "$DEBUG"
+execute_memory_calculator "$BIN" "$DEBUG" "$ENABLE_PREVIEW"
 
 [ "$DEBUG" = true ] && set -x
 exec java $JVM_FLAGS -cp $(cat "$JIB_CLASSPATH_FILE") $(cat "$JIB_MAIN_CLASS_FILE") "$@"

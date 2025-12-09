@@ -90,9 +90,13 @@ memory-calculator -h
 
 `entrypoint.sh` 支援以下作業系統環境變數：
 
-- `MEM_CALC_HOME`：用於設定執行檔的目錄，預設值為: `/usr/local/bin`。
-- `MEM_CALC_ENABLED`：預設為 `true`，若將此值設為 `false`，則會跳過記憶體計算，直接啟動 Java 應用程式。
-- `MEM_CALC_DEBUG`：除錯模式，預設為 `false`，若將此值設為 `true`，則會列印出計算過程中除錯訊息，及啟動 Java 應用程式的完整指令。
+- `MEM_CALC_HOME`：指定可執行檔所在目錄 (預設 `/usr/local/bin`)
+- `MEM_CALC_ENABLED`：是否啟用記憶體計算工具，可設定 `true`/`false` (預設 `true`)
+- `MEM_CALC_DEBUG`：是否啟用除錯模式，可設定 `true`/`false`，除錯模式中會列印出計算過程中除錯訊息，及啟動 Java 應用程式的完整指令 (預設 `false`)
+- `MEM_CALC_ENABLE_PREVIEW`：是否啟用預覽功能，可設定 `true`/`false` (預設 `false`)
+
+> [!NOTE]
+> 預覽功能可能包含仍在測試或不穩定的功能, 其 API 也可能隨時調整
 
 ## 開發前準備
 

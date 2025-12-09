@@ -18,3 +18,5 @@ test: bootstrap govet gofmt ## Run tests
 build: test ## Build app
 	 go build -o ./build/memory-calculator
 
+goreleaser-build: ## Build app with goreleaser w/o validation
+	goreleaser build --clean --skip validate
