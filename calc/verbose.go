@@ -24,18 +24,8 @@ func NewVerbose() *Verbose {
 	return &v
 }
 
-func (v *Verbose) Set(s string) error {
-	f, err := strconv.ParseBool(s)
-	if err != nil {
-		return err
-	}
-
-	*v = Verbose(f)
-	return nil
-}
-
-func (v *Verbose) Type() string {
-	return "bool"
+func (v *Verbose) Set(s bool) {
+	*v = Verbose(s)
 }
 
 func (v *Verbose) String() string {
