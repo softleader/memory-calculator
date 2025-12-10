@@ -15,6 +15,7 @@ const (
 type PreparerManager struct {
 	Logger    bard.Logger
 	Preparers []Preparer
+	Verbose   bool
 }
 
 // NewPreparerManager creates a new instance of the PreparerManager coordinator,
@@ -32,10 +33,8 @@ func NewPreparerManager(logger bard.Logger) PreparerManager {
 // Prepare executes all registered preparation steps in order.
 func (p PreparerManager) PrepareAll() error {
 	s, ok := os.LookupEnv("JAVA_TOOL_OPTIONS")
-	if ok {
-		p.Logger.Infof("Found JAVA_TOOL_OPTIONS: %s", s)
-	} else {
-		p.Logger.Info("JAVA_TOOL_OPTIONS not found")
+	if ok && p.Verbose {
+		p.Logger.Infof("Found JAVA_TOOL_OPTIONS in prepare stage: %s", s)
 	}
 
 	for i, step := range p.Preparers {

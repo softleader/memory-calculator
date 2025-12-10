@@ -46,6 +46,7 @@ type config struct {
 	boot          boot.SpringOptimizer
 	calc          calc.Calculator
 	enablePreview bool
+	verbose       bool
 }
 
 func main() {
@@ -79,7 +80,7 @@ func main() {
 	f.Var(c.calc.EnableJfr, calc.FlagEnableJfr, calc.UsageEnableJfr)
 	f.Var(c.calc.EnableJmx, calc.FlagEnableJmx, calc.UsageEnableJmx)
 	f.Var(c.calc.EnableJdwp, calc.FlagEnableJdwp, calc.UsageEnableJdwp)
-	f.VarP(c.calc.Verbose, calc.FlagVerbose, calc.FlagShortVerbose, calc.UsageVerbose)
+	f.BoolVarP(&c.verbose, calc.FlagVerbose, calc.FlagShortVerbose, c.verbose, calc.UsageVerbose)
 	f.Var(c.boot.AppClassesPath, boot.FlagAppClassesPath, boot.UsageAppClassesPath)
 	f.Var(c.boot.AppLibPath, boot.FlagAppLibPath, boot.UsageAppLibPath)
 	f.StringVarP(&c.output, "output", "o", c.output, "write to a file, instead of STDOUT")
@@ -94,6 +95,12 @@ func run(c config) error {
 	if c.version {
 		fmt.Println(version)
 		return nil
+	}
+
+	if c.verbose {
+		c.calc.Verbose.Set(c.verbose)
+		c.prep.Verbose = c.verbose
+		c.boot.Verbose = c.verbose
 	}
 
 	if c.enablePreview {
