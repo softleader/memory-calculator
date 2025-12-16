@@ -125,10 +125,10 @@ curl -sL https://raw.githubusercontent.com/softleader/memory-calculator/main/ins
 
 | Flag | 說明 | 預設值 |
 |---|---|---|
-| `--version=<tag>` | 指定要安裝的版本 (例如, `v0.1.0`)。 | `latest` |
-| `--entrypoint=<path>` | 安裝後將 `entrypoint.sh` 複製到指定路徑。 | 未設置 |
-| `--os=<os>` | 覆寫檢測到的操作系統。支援: `linux`, `darwin`。 | 自動檢測 |
-| `--arch=<arch>` | 覆寫檢測到的 CPU 架構。支援: `amd64`, `arm64`。 | 自動檢測 |
+| `--version=<tag>` | 指定要安裝的版本 (例如, `1.2.3`)。 | `latest` |
+| `--entrypoint=<path>` | 安裝後將 `entrypoint.sh` 複製到指定目錄 | 未設置，即不複製 |
+| `--os=<os>` | 覆寫檢測到的操作系統。支援: `linux`, `darwin` | 自動檢測 |
+| `--arch=<arch>` | 覆寫檢測到的 CPU 架構。支援: `amd64`, `arm64` | 自動檢測 |
 
 ### 範例
 
