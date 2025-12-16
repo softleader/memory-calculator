@@ -1,12 +1,7 @@
-FROM golang:1.20-alpine AS builder
-ENV GO111MODULE=on CGO_ENABLED=0
-WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
-COPY main.go .
-COPY calc ./calc
-RUN go vet && gofmt -s -w . && go build -o memory-calculator
-
 FROM eclipse-temurin:17-jre-alpine
-COPY --from=builder /app/memory-calculator /usr/local/bin/memory-calculator
-COPY entrypoint.sh /tmp/entrypoint.sh
+
+# 記憶體計算工具
+RUN apk add --no-cache curl unzip && \
+    curl -sL https://raw.githubusercontent.com/softleader/memory-calculator/refs/heads/main/install.sh | sh -s -- --entrypoint=/
+
+ENTRYPOINT ["/entrypoint.sh"]
