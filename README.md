@@ -106,10 +106,10 @@ memory-calculator -h
 
 ## Install Script
 
-您可以使用 `install.sh` 腳本在系統（Linux 或 macOS）上輕鬆安裝 `memory-calculator`。該腳本會自動檢測操作的系統和架構，以下載正確的二進位檔案。
+使用 [`install.sh`](./installsh) 腳本可以在系統（Linux 或 macOS）上輕鬆安裝 `memory-calculator`。該腳本會自動檢測操作的系統和架構，以下載正確的二進位檔案。
 
 > [!NOTE]
-> 此腳本需要 `root`權限，才能將二進位檔案移動到 `/usr/local/bin`
+> 此腳本需要將二進位檔案移動到 `/usr/local/bin` 中，請確保執行時擁有對應的權限
 
 ### 基本用法
 
@@ -149,6 +149,10 @@ curl -sL https://raw.githubusercontent.com/softleader/memory-calculator/main/ins
 **強制安裝特定平台（進階用法）:**
 
 ```sh
-curl -sL https://raw.githubusercontent.com/softleader/memory-calculator/main/install.sh | sudo bash -s -- --os=linux --arch=arm64
+curl -sL https://raw.githubusercontent.com/softleader/memory-calculator/main/install.sh | sh -s -- --os=linux --arch=arm64
 ```
+
+**在 Dockerfile 中安裝:**
+
+參考 [`Dockerfile`](./Dockerfile)
 
