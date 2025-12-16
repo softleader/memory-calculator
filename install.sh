@@ -5,16 +5,18 @@
 set -eu
 
 # --- Constants ---
-readonly INSTALL_BASE_DIR="/opt/memory-calculator"
-readonly BIN_DIR="${INSTALL_BASE_DIR}/bin"
-readonly SYMLINK_PATH="/usr/local/bin/memory-calculator"
-readonly TMP_DIR="/tmp"
-readonly RELEASES_URL="https://github.com/softleader/memory-calculator/releases/latest/download"
-readonly SUPPORTED_ARCHS="amd64 arm64"
+readonly GITHUB_REPO_URL="https://github.com/softleader/memory-calculator"
+readonly INSTALL_BIN_PATH="/usr/local/bin/memory-calculator"
+
+# --- Script Variables (set by parsing args or detection) ---
+VERSION_TAG="latest"
+ENTRYPOINT_TARGET_PATH=""
+OS_OVERRIDE=""
+ARCH_OVERRIDE=""
+PLATFORM=""
+TMP_DIR=""
 
 # --- Logging ---
-# Prints an error message to stderr and exits.
-# Usage: error "Something went wrong"
 error() {
   echo "Error: $*" >&2
   exit 1
@@ -22,135 +24,124 @@ error() {
 
 # --- Core Functions ---
 
+parse_args() {
+  for arg in "$@"; do
+    case "$arg" in
+      --version=*)    VERSION_TAG="${arg#*=}" ;;
+      --entrypoint=*) ENTRYPOINT_TARGET_PATH="${arg#*=}" ;;
+      --os=*)         OS_OVERRIDE="${arg#*=}" ;;
+      --arch=*)       ARCH_OVERRIDE="${arg#*=}" ;;
+    esac
+  done
+}
+
 check_privileges() {
   if [ "$(id -u)" -ne 0 ]; then
-    error "This script requires root or sudo privileges. Please try: sudo $0"
+    error "This script requires root or sudo privileges. Please run with sudo."
   fi
 }
 
 check_dependencies() {
-  for cmd in curl unzip; do
+  for cmd in curl unzip uname tr; do
     if ! command -v "$cmd" > /dev/null 2>&1; then
       error "This script requires '$cmd', but it is not installed."
     fi
   done
 }
 
-# Downloads and extracts a release for a specific architecture.
-# Usage: setup_arch "amd64"
-setup_arch() {
-  arch=$1
-  zip_file="${TMP_DIR}/linux-${arch}.zip"
-  url="${RELEASES_URL}/linux-${arch}.zip"
-  extract_dir="${BIN_DIR}/${arch}"
-  binary_path="${extract_dir}/memory-calculator"
+determine_platform() {
+  local os="${OS_OVERRIDE}"
+  local arch="${ARCH_OVERRIDE}"
 
-  echo "Setting up ${arch} architecture..."
-  
-  mkdir -p "$extract_dir"
-  curl -L -s -o "$zip_file" "$url"
-  unzip -o -q "$zip_file" -d "$extract_dir"
-  rm -f "$zip_file"
-  
-  # Set executable permissions for the binary
-  chmod 755 "$binary_path"
+  if [ -z "$os" ]; then
+    os=$(uname -s | tr '[:upper:]' '[:lower:]')
+  else
+    echo "Using specified OS: ${os}"
+  fi
+
+  if [ -z "$arch" ]; then
+    arch=$(uname -m)
+  else
+    echo "Using specified Arch: ${arch}"
+  fi
+
+  # Normalize OS
+  case "$os" in
+    linux) os="linux" ;;
+    darwin) os="darwin" ;;
+    *) error "Unsupported OS: ${os}" ;;
+  esac
+
+  # Normalize Arch
+  case "$arch" in
+    x86_64) arch="amd64" ;;
+    aarch64 | arm64) arch="arm64" ;;
+    amd64) arch="amd64" ;; # Allow explicit 'amd64'
+    *) error "Unsupported architecture: ${arch}" ;;
+  esac
+
+  PLATFORM="${os}-${arch}"
+  echo "Determined platform: ${PLATFORM}"
 }
 
-create_wrapper_script() {
-  wrapper_path="${BIN_DIR}/memory-calculator"
-  
-  # Using a here document to create the script content
-  cat << 'EOF' > "$wrapper_path"
-#!/bin/sh
-set -e
+download_and_extract() {
+  local zip_name="${PLATFORM}.zip"
+  local download_url
 
-# Get the directory where this script is located
-SCRIPT_DIR=$(dirname "$(readlink -f "$0" 2>/dev/null || realpath "$0" 2>/dev/null || echo "$0")")
+  if [ "$VERSION_TAG" = "latest" ]; then
+    download_url="${GITHUB_REPO_URL}/releases/latest/download/${zip_name}"
+  else
+    download_url="${GITHUB_REPO_URL}/releases/download/${VERSION_TAG}/${zip_name}"
+  fi
 
-# Determine CPU architecture
-ARCH=$(uname -m)
+  echo "Downloading from: ${download_url}"
 
-case "$ARCH" in
-  "x86_64")
-    BIN_PATH="${SCRIPT_DIR}/amd64/memory-calculator"
-    ;;
-  "aarch64")
-    BIN_PATH="${SCRIPT_DIR}/arm64/memory-calculator"
-    ;;
-  *)
-    echo "Error: Unsupported architecture: $ARCH" >&2
-    exit 1
-    ;;
-esac
+  local zip_file="${TMP_DIR}/${zip_name}"
+  curl -L -s -o "${zip_file}" "${download_url}"
 
-if [ ! -f "$BIN_PATH" ]; then
-    echo "Error: Binary not found for architecture $ARCH at $BIN_PATH" >&2
-    exit 1
-fi
+  if ! unzip -t "${zip_file}" > /dev/null 2>&1; then
+    error "Download failed. Check if version '${VERSION_TAG}' and platform '${PLATFORM}' are valid. URL: ${download_url}"
+  fi
 
-# If MEM_CALC_DEBUG is true, print the binary being used to stderr.
-if [ "${MEM_CALC_DEBUG:-false}" = "true" ]; then
-  echo "DEBUG: Using binary: $BIN_PATH" >&2
-fi
-
-# Execute the target binary, passing all arguments
-exec "$BIN_PATH" "$@"
-EOF
-
-  chmod +x "$wrapper_path"
+  unzip -o -q "${zip_file}" -d "${TMP_DIR}"
 }
 
-create_symlink() {
-  ln -sf "${BIN_DIR}/memory-calculator" "$SYMLINK_PATH"
-}
+install_files() {
+  echo "Installing 'memory-calculator' to ${INSTALL_BIN_PATH}..."
+  mv "${TMP_DIR}/memory-calculator" "${INSTALL_BIN_PATH}"
+  chmod 755 "${INSTALL_BIN_PATH}"
 
-# Copies entrypoint.sh if the --entrypoint flag was used.
-# It iterates through supported architectures and copies from the first one found.
-copy_entrypoint() {
   if [ -n "$ENTRYPOINT_TARGET_PATH" ]; then
-    copied_successfully=0 # Flag to track if copy was successful
-    for arch in $SUPPORTED_ARCHS; do
-      source_entrypoint="${BIN_DIR}/${arch}/entrypoint.sh"
-      if [ -f "$source_entrypoint" ]; then
-        echo "Copying entrypoint.sh to $ENTRYPOINT_TARGET_PATH"
-        mkdir -p "$ENTRYPOINT_TARGET_PATH"
-        cp "$source_entrypoint" "$ENTRYPOINT_TARGET_PATH/"
-        copied_successfully=1
-        break # Stop after the first successful copy
-      fi
-    done
-
-    if [ "$copied_successfully" -eq 0 ]; then
-      echo "Warning: entrypoint.sh not found in any supported archive, cannot copy." >&2
+    local source_entrypoint="${TMP_DIR}/entrypoint.sh"
+    if [ -f "$source_entrypoint" ]; then
+      echo "Copying entrypoint.sh to ${ENTRYPOINT_TARGET_PATH}"
+      mkdir -p "$(dirname "${ENTRYPOINT_TARGET_PATH}")"
+      cp "${source_entrypoint}" "${ENTRYPOINT_TARGET_PATH}"
+      chmod 755 "${ENTRYPOINT_TARGET_PATH}"
+    else
+      echo "Warning: entrypoint.sh not found in archive, cannot copy." >&2
     fi
   fi
 }
 
 # --- Main Logic ---
 main() {
+  parse_args "$@"
   check_privileges
   check_dependencies
+  determine_platform
 
-  for arch in $SUPPORTED_ARCHS; do
-    setup_arch "$arch"
-  done
+  # Setup temp dir and cleanup
+  TMP_DIR="/tmp/mc-install-$$"
+  mkdir -p "${TMP_DIR}"
+  trap 'rm -rf "${TMP_DIR}"' EXIT
 
-  create_wrapper_script
-  create_symlink
+  download_and_extract
+  install_files
 
-  copy_entrypoint
-
-  echo "Installation complete! 'memory-calculator' is ready to use."
+  echo "Installation complete! 'memory-calculator' version ${VERSION_TAG} is ready to use."
 }
 
 # --- Script Entrypoint ---
-ENTRYPOINT_TARGET_PATH=""
-for arg in "$@"; do
-  case "$arg" in
-    --entrypoint=*)
-      ENTRYPOINT_TARGET_PATH="${arg#*=}"
-      ;;
-  esac
-done
+main "$@"
 
-main

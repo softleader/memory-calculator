@@ -103,3 +103,52 @@ memory-calculator -h
 - Golang: v1.24+
 - Jib ContainerTool
 - Linux 基礎映像
+
+## Install Script
+
+您可以使用 `install.sh` 腳本在系統（Linux 或 macOS）上輕鬆安裝 `memory-calculator`。該腳本會自動檢測操作的系統和架構，以下載正確的二進位檔案。
+
+> [!NOTE]
+> 此腳本需要 `root`權限，才能將二進位檔案移動到 `/usr/local/bin`
+
+### 基本用法
+
+執行以下命令以下載並安裝最新版本：
+
+```sh
+curl -sL https://raw.githubusercontent.com/softleader/memory-calculator/main/install.sh | sh
+```
+
+### 支援的參數
+
+安裝腳本支援了多個參數以自定義其行為：
+
+| Flag | 說明 | 預設值 |
+|---|---|---|
+| `--version=<tag>` | 指定要安裝的版本 (例如, `v0.1.0`)。 | `latest` |
+| `--entrypoint=<path>` | 安裝後將 `entrypoint.sh` 複製到指定路徑。 | 未設置 |
+| `--os=<os>` | 覆寫檢測到的操作系統。支援: `linux`, `darwin`。 | 自動檢測 |
+| `--arch=<arch>` | 覆寫檢測到的 CPU 架構。支援: `amd64`, `arm64`。 | 自動檢測 |
+
+### 範例
+
+**安裝特定版本:**
+
+```sh
+curl -sL https://raw.githubusercontent.com/softleader/memory-calculator/main/install.sh | sh -s -- --version=1.2.3
+```
+
+**安裝最新版本並複製 `entrypoint.sh`:**
+
+這對於設置容器映像非常有用。
+
+```sh
+curl -sL https://raw.githubusercontent.com/softleader/memory-calculator/main/install.sh | sh -s -- --entrypoint=/path/to/my-folder
+```
+
+**強制安裝特定平台（進階用法）:**
+
+```sh
+curl -sL https://raw.githubusercontent.com/softleader/memory-calculator/main/install.sh | sudo bash -s -- --os=linux --arch=arm64
+```
+
