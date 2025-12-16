@@ -108,8 +108,11 @@ memory-calculator -h
 
 使用 [`install.sh`](./installsh) 腳本可以在系統（Linux 或 macOS）上輕鬆安裝 `memory-calculator`。該腳本會自動檢測操作的系統和架構，以下載正確的二進位檔案。
 
-> [!NOTE]
-> 此腳本需要將二進位檔案移動到 `/usr/local/bin` 中，請確保執行時擁有對應的權限
+執行前請先確認環境要求:
+
+- 此腳本需要將二進位檔案移動到 `/usr/local/bin` 中，請確保執行時擁有讀寫權限
+- 若有指定 `--entrypoint` 目錄，請確保執行時擁有讀寫權限
+- 此腳本依賴套件：`curl`, `unzip`, `unam`，請事先安裝好，或提供足夠的權限讓腳本自動安裝
 
 ### 基本用法
 
