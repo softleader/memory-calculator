@@ -36,8 +36,27 @@ parse_args() {
 }
 
 check_privileges() {
-  if [ "$(id -u)" -ne 0 ]; then
-    error "This script requires root or sudo privileges. Please run with sudo."
+  local install_dir
+  install_dir=$(dirname "${INSTALL_BIN_PATH}")
+  if ! [ -d "${install_dir}" ]; then
+    error "Installation directory '${install_dir}' does not exist. Please create it or use sudo."
+  elif ! [ -w "${install_dir}" ]; then
+    error "You do not have write permissions for ${install_dir}. Please run with sudo."
+  fi
+
+  if [ -n "$ENTRYPOINT_TARGET_PATH" ]; then
+    local entrypoint_dir
+    entrypoint_dir=$(dirname "${ENTRYPOINT_TARGET_PATH}")
+
+    # The script will use 'mkdir -p', so we check permissions on the first existing parent.
+    local dir_to_check="${entrypoint_dir}"
+    while [ "${dir_to_check}" != "." ] && [ "${dir_to_check}" != "/" ] && ! [ -d "${dir_to_check}" ]; do
+      dir_to_check=$(dirname "${dir_to_check}")
+    done
+
+    if ! [ -w "${dir_to_check}" ]; then
+      error "You do not have write permissions for '${dir_to_check}' to create '${entrypoint_dir}'. Please run with sudo."
+    fi
   fi
 }
 
