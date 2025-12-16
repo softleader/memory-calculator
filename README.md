@@ -107,7 +107,7 @@ memory-calculator -h
 
 - 此腳本需要將二進位檔案移動到 `/usr/local/bin` 中，請確保執行時擁有讀寫權限
 - 若有指定 `--entrypoint` 目錄，請確保執行時擁有讀寫權限
-- 此腳本依賴套件：`curl`, `unzip`, `uname`，請確保執行前系統已安裝
+- 此腳本依賴套件：`curl`, `unzip`, `uname`，請確保系統已安裝且有執行權限
 
 ### 基本用法
 
