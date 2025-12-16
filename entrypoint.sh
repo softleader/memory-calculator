@@ -25,7 +25,7 @@ execute_memory_calculator() {
   debug=$2
   enablePreview=$3
   "$bin_path/memory-calculator" -o="$TMP_ENV" -v="$debug" --enable-preview="$enablePreview" || {
-    echo "Memory calculator failed, version: $("$bin_path/memory-calculator" --version)";
+    echo "Memory calculator failed (version: $("$bin_path/memory-calculator" --version), platform: $("$bin_path/memory-calculator" --platform))";
     exit 1;
   }
   if [ -f "$TMP_ENV" ]; then
