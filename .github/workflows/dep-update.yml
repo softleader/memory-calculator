@@ -30,7 +30,7 @@ jobs:
           echo '```' >> /tmp/diff.md
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         # 請參考 https://github.com/peter-evans/create-pull-request 以獲得更詳盡的說明
         with:
           commit-message: "chore: update dependencies"
