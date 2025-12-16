@@ -98,11 +98,6 @@ memory-calculator -h
 > [!NOTE]
 > 預覽功能可能包含仍在測試或不穩定的功能, 其 API 也可能隨時調整
 
-## 開發前準備
-
-- Golang: v1.24+
-- Jib ContainerTool
-- Linux 基礎映像
 
 ## Install Script
 
@@ -158,4 +153,3 @@ curl -sL https://raw.githubusercontent.com/softleader/memory-calculator/main/ins
 **在 Dockerfile 中安裝:**
 
 參考 [`Dockerfile`](./Dockerfile)
-
