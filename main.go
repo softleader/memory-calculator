@@ -60,6 +60,7 @@ func main() {
 		version:  false,
 		platform: false,
 		output:   "",
+		logger:   logger,
 		prep:     prep.NewPreparerManager(logger),
 		boot:     boot.NewSpringOptimizer(logger),
 		calc:     calc.NewCalculator(logger),
@@ -115,13 +116,15 @@ func run(c config) error {
 	}
 
 	if c.enablePreview {
-		if err := c.prep.PrepareAll(); err != nil {
-			return err
-		}
+		c.logger.Info("Enabling preview features")
+	}
 
-		if err := c.boot.Execute(); err != nil {
-			return err
-		}
+	if err := c.prep.PrepareAll(); err != nil {
+		return err
+	}
+
+	if err := c.boot.Execute(); err != nil {
+		return err
 	}
 
 	j, err := c.calc.Execute()
