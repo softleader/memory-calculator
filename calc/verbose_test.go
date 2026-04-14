@@ -20,7 +20,7 @@ func TestNewVerbose_EnvVarSetDebug(t *testing.T) {
 	defer os.Unsetenv(EnvVerbose)
 
 	v := NewVerbose()
-	if *v {
+	if !*v {
 		t.Errorf("Expected true, got %v", *v)
 	}
 }
