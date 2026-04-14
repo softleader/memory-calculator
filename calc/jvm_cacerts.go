@@ -41,7 +41,11 @@ func (j *JVMCacerts) Contribute() error {
 	if s := j.String(); s == "" {
 		if javaHome, ok := os.LookupEnv(envJavaHome); ok {
 			cacert := filepath.Join(javaHome, subPathCacerts)
-			if exist, err := isFileExist(cacert); exist && err == nil {
+			f, err := os.Open(cacert)
+			if err == nil {
+				defer func(f *os.File) {
+					_ = f.Close()
+				}(f)
 				*j = JVMCacerts(cacert)
 			}
 		}
@@ -52,15 +56,4 @@ func (j *JVMCacerts) Contribute() error {
 		}
 	}
 	return nil
-}
-
-func isFileExist(path string) (bool, error) {
-	fileInfo, err := os.Stat(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-		return false, err
-	}
-	return !fileInfo.IsDir(), nil
 }
