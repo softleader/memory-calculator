@@ -43,8 +43,5 @@ func (hr *HeadRoom) String() string {
 }
 
 func (hr *HeadRoom) Contribute() error {
-	if err := os.Setenv(EnvHeadRoom, hr.String()); err != nil {
-		return err
-	}
-	return nil
+	return os.Setenv(EnvHeadRoom, hr.String())
 }

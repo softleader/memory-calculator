@@ -32,7 +32,6 @@ type Calculator struct {
 	Logger bard.Logger
 	// MemoryLimitPath 一般情境不需要調整, 開出來是讓 test 時可以設定細節
 	MemoryLimitPath *MemoryLimitPath
-	//
 
 	JVMOptions       *JVMOptions
 	HeadRoom         *HeadRoom
@@ -120,56 +119,38 @@ func (c *Calculator) Execute() (*JavaToolOptions, error) {
 // https://github.com/paketo-buildpacks/libjvm/blob/main/cmd/helper/main.go
 // https://github.com/paketo-buildpacks/libjvm/blob/main/build.go#L274
 func (c *Calculator) buildHelpers() (h map[string]sherpa.ExecD, err error) {
-	var (
-		l  = c.Logger
-		cl = libjvm.NewCertificateLoader()
+	l := c.Logger
 
-		a   = helper.ActiveProcessorCount{Logger: l}
-		spc = helper.SecurityProvidersConfigurer{Logger: l}
-		d   = helper.LinkLocalDNS{Logger: l}
-		j   = helper.JavaOpts{Logger: l}
-		jh  = helper.JVMHeapDump{Logger: l}
-		m   = helper.MemoryCalculator{
+	d := helper.LinkLocalDNS{Logger: l}
+	d.Config, err = dns.ClientConfigFromFile("/etc/resolv.conf")
+	if err != nil {
+		return nil, fmt.Errorf("unable to read DNS client configuration from %s\n%w", "/etc/resolv.conf", err)
+	}
+
+	h = map[string]sherpa.ExecD{
+		helperActiveProcessorCount:        helper.ActiveProcessorCount{Logger: l},
+		helperJavaOpts:                    helper.JavaOpts{Logger: l},
+		helperJvmHeap:                     helper.JVMHeapDump{Logger: l},
+		helperLinkLocalDns:                d,
+		helperMemoryCalculator: helper.MemoryCalculator{
 			Logger:            l,
 			MemoryLimitPathV1: c.MemoryLimitPath.V1,
 			MemoryLimitPathV2: c.MemoryLimitPath.V2,
 			MemoryInfoPath:    helper.DefaultMemoryInfoPath,
-		}
-		o  = helper.OpenSSLCertificateLoader{CertificateLoader: cl, Logger: l}
-		s9 = helper.SecurityProvidersClasspath9{Logger: l}
-		d9 = helper.Debug9{Logger: l}
-		jm = helper.JMX{Logger: l}
-		n  = helper.NMT{Logger: l}
-		jf = helper.JFR{Logger: l}
-	)
-
-	file := "/etc/resolv.conf"
-	d.Config, err = dns.ClientConfigFromFile(file)
-	if err != nil {
-		return nil, fmt.Errorf("unable to read DNS client configuration from %s\n%w", file, err)
-	}
-
-	h = map[string]sherpa.ExecD{
-		helperActiveProcessorCount:        a,
-		helperJavaOpts:                    j,
-		helperJvmHeap:                     jh,
-		helperLinkLocalDns:                d,
-		helperMemoryCalculator:            m,
-		helperOpensslCertificateLoader:    o,
-		helperSecurityProvidersClasspath9: s9,
-		helperSecurityProvidersConfigurer: spc,
-		helperDebug9:                      d9,
-		helperJmx:                         jm,
-		helperNmt:                         n,
-		helperJfr:                         jf,
+		},
+		helperSecurityProvidersClasspath9: helper.SecurityProvidersClasspath9{Logger: l},
+		helperSecurityProvidersConfigurer: helper.SecurityProvidersConfigurer{Logger: l},
+		helperDebug9:                      helper.Debug9{Logger: l},
+		helperJmx:                         helper.JMX{Logger: l},
+		helperJfr:                         helper.JFR{Logger: l},
 	}
 	// 底層的實作中要求若開啟 jvm-cacert 則必須要設定相關的系統參數, 否則會報錯, 所以針對這個改成沒設定就不要跑了
-	if *c.JVMCacerts == "" {
-		delete(h, helperOpensslCertificateLoader)
+	if *c.JVMCacerts != "" {
+		h[helperOpensslCertificateLoader] = helper.OpenSSLCertificateLoader{CertificateLoader: libjvm.NewCertificateLoader(), Logger: l}
 	}
 	// 由於關閉 nmt 底層會印出一些關閉的 log, 我不想要看到那些, 所以針對這個改成沒開啟就不要跑了
-	if !*c.EnableNmt {
-		delete(h, helperNmt)
+	if *c.EnableNmt {
+		h[helperNmt] = helper.NMT{Logger: l}
 	}
 	return h, nil
 }

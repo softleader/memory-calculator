@@ -1,7 +1,6 @@
 package boot
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -28,7 +27,7 @@ func (alp *AppLibPath) Set(s string) error {
 }
 
 func (alp *AppLibPath) String() string {
-	return fmt.Sprintf("%s", *alp)
+	return string(*alp)
 }
 
 func (alp *AppLibPath) Type() string {
@@ -36,8 +35,5 @@ func (alp *AppLibPath) Type() string {
 }
 
 func (alp *AppLibPath) Contribute() error {
-	if err := os.Setenv(EnvAppLibPath, alp.String()); err != nil {
-		return err
-	}
-	return nil
+	return os.Setenv(EnvAppLibPath, alp.String())
 }

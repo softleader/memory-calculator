@@ -18,8 +18,8 @@ type Verbose bool
 
 func NewVerbose() *Verbose {
 	v := DefaultVerbose
-	if val, ok := os.LookupEnv(EnvEnableNmt); ok {
-		v = val == levelDebug
+	if val, ok := os.LookupEnv(EnvVerbose); ok {
+		v = Verbose(val == levelDebug)
 	}
 	return &v
 }

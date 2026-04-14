@@ -1,7 +1,6 @@
 package calc
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -28,7 +27,7 @@ func (j *JVMClassAdj) Set(s string) error {
 }
 
 func (j *JVMClassAdj) String() string {
-	return fmt.Sprintf("%s", *j)
+	return string(*j)
 }
 
 func (j *JVMClassAdj) Type() string {
@@ -37,9 +36,7 @@ func (j *JVMClassAdj) Type() string {
 
 func (j *JVMClassAdj) Contribute() error {
 	if s := j.String(); s != "" {
-		if err := os.Setenv(EnvJVMClassAdj, s); err != nil {
-			return err
-		}
+		return os.Setenv(EnvJVMClassAdj, s)
 	}
 	return nil
 }

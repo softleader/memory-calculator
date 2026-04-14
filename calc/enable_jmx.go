@@ -43,8 +43,5 @@ func (jmx *EnableJmx) String() string {
 }
 
 func (jmx *EnableJmx) Contribute() error {
-	if err := os.Setenv(EnvEnableJmx, jmx.String()); err != nil {
-		return err
-	}
-	return nil
+	return os.Setenv(EnvEnableJmx, jmx.String())
 }

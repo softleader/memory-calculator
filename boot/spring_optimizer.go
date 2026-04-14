@@ -5,12 +5,7 @@ import (
 	"strings"
 
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/libpak/sherpa"
 	boot "github.com/softleader/memory-calculator/boot/helper"
-)
-
-const (
-	helperWebApplicationType = "web-application-type"
 )
 
 type SpringOptimizer struct {
@@ -35,47 +30,17 @@ func (so *SpringOptimizer) Execute() error {
 		return err
 	}
 
-	hs, err := so.buildHelpers()
+	wat := boot.WebApplicationType{Logger: so.Logger}
+	values, err := wat.Execute()
 	if err != nil {
 		return err
 	}
-
-	inOrder := []string{
-		helperWebApplicationType,
-	}
-
-	// 按照指定順序執行
-	for _, key := range inOrder {
-		h, ok := hs[key]
-		if !ok {
-			continue
-		}
-		values, err := h.Execute()
-		if err != nil {
+	for k, v := range values {
+		if err = os.Setenv(k, strings.TrimSpace(v)); err != nil {
 			return err
 		}
-		for k, v := range values {
-			v = strings.TrimSpace(v)
-			if err = os.Setenv(k, v); err != nil { // update golang environment variable
-				return err
-			}
-		}
 	}
-
 	return nil
-}
-
-func (so *SpringOptimizer) buildHelpers() (h map[string]sherpa.ExecD, err error) {
-	var (
-		l   = so.Logger
-		wat = boot.WebApplicationType{Logger: l}
-	)
-
-	h = map[string]sherpa.ExecD{
-		helperWebApplicationType: wat,
-	}
-
-	return h, nil
 }
 
 func (so *SpringOptimizer) contribute() error {

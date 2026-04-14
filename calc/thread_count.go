@@ -42,8 +42,5 @@ func (tc *ThreadCount) String() string {
 }
 
 func (tc *ThreadCount) Contribute() error {
-	if err := os.Setenv(EnvThreadCount, tc.String()); err != nil {
-		return err
-	}
-	return nil
+	return os.Setenv(EnvThreadCount, tc.String())
 }

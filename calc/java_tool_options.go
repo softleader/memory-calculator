@@ -21,8 +21,12 @@ func BuildJavaToolOptions() *JavaToolOptions {
 	if val, ok := os.LookupEnv(EnvJavaToolOptions); ok {
 		o = val
 	}
+	existing := make(map[string]struct{}, len(strings.Fields(o)))
+	for _, part := range strings.Fields(o) {
+		existing[part] = struct{}{}
+	}
 	for _, option := range ContributeOptions {
-		if !strings.Contains(o, option) {
+		if _, found := existing[option]; !found {
 			if o == "" {
 				o = option
 			} else {

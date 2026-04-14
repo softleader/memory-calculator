@@ -43,8 +43,5 @@ func (nmt *EnableNmt) String() string {
 }
 
 func (nmt *EnableNmt) Contribute() error {
-	if err := os.Setenv(EnvEnableNmt, nmt.String()); err != nil {
-		return err
-	}
-	return nil
+	return os.Setenv(EnvEnableNmt, nmt.String())
 }

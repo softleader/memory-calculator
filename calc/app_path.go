@@ -1,7 +1,6 @@
 package calc
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -28,7 +27,7 @@ func (ap *AppPath) Set(s string) error {
 }
 
 func (ap *AppPath) String() string {
-	return fmt.Sprintf("%s", *ap)
+	return string(*ap)
 }
 
 func (ap *AppPath) Type() string {
@@ -36,8 +35,5 @@ func (ap *AppPath) Type() string {
 }
 
 func (ap *AppPath) Contribute() error {
-	if err := os.Setenv(EnvAppPath, ap.String()); err != nil {
-		return err
-	}
-	return nil
+	return os.Setenv(EnvAppPath, ap.String())
 }

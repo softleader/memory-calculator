@@ -1,7 +1,6 @@
 package boot
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -28,7 +27,7 @@ func (acp *AppClassesPath) Set(s string) error {
 }
 
 func (acp *AppClassesPath) String() string {
-	return fmt.Sprintf("%s", *acp)
+	return string(*acp)
 }
 
 func (acp *AppClassesPath) Type() string {
@@ -36,8 +35,5 @@ func (acp *AppClassesPath) Type() string {
 }
 
 func (acp *AppClassesPath) Contribute() error {
-	if err := os.Setenv(EnvAppClassesPath, acp.String()); err != nil {
-		return err
-	}
-	return nil
+	return os.Setenv(EnvAppClassesPath, acp.String())
 }

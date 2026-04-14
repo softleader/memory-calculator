@@ -1,7 +1,6 @@
 package calc
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -30,7 +29,7 @@ func (j *JVMCacerts) Set(s string) error {
 }
 
 func (j *JVMCacerts) String() string {
-	return fmt.Sprintf("%s", *j)
+	return string(*j)
 }
 
 func (j *JVMCacerts) Type() string {
@@ -38,29 +37,19 @@ func (j *JVMCacerts) Type() string {
 }
 
 func (j *JVMCacerts) Contribute() error {
-	if s := j.String(); s == "" {
+	cacert := j.String()
+	if cacert == "" {
 		if javaHome, ok := os.LookupEnv(envJavaHome); ok {
-			cacert := filepath.Join(javaHome, subPathCacerts)
-			if exist, err := isFileExist(cacert); exist && err == nil {
-				*j = JVMCacerts(cacert)
+			path := filepath.Join(javaHome, subPathCacerts)
+			if f, err := os.Open(path); err == nil {
+				f.Close()
+				*j = JVMCacerts(path)
+				cacert = path
 			}
 		}
 	}
-	if s := j.String(); s != "" {
-		if err := os.Setenv(EnvJVMCacerts, s); err != nil {
-			return err
-		}
+	if cacert != "" {
+		return os.Setenv(EnvJVMCacerts, cacert)
 	}
 	return nil
-}
-
-func isFileExist(path string) (bool, error) {
-	fileInfo, err := os.Stat(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-		return false, err
-	}
-	return !fileInfo.IsDir(), nil
 }

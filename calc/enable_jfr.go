@@ -43,8 +43,5 @@ func (jfr *EnableJfr) String() string {
 }
 
 func (jfr *EnableJfr) Contribute() error {
-	if err := os.Setenv(EnvEnableJfr, jfr.String()); err != nil {
-		return err
-	}
-	return nil
+	return os.Setenv(EnvEnableJfr, jfr.String())
 }

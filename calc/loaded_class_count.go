@@ -46,8 +46,5 @@ func (lcc *LoadedClassCount) HasValue() bool {
 }
 
 func (lcc *LoadedClassCount) Contribute() error {
-	if err := os.Setenv(EnvLoadedClassCount, lcc.String()); err != nil {
-		return err
-	}
-	return nil
+	return os.Setenv(EnvLoadedClassCount, lcc.String())
 }
