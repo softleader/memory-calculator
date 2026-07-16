@@ -2,7 +2,7 @@
 
 ## Status
 
-- 狀態：In progress（Checkpoint A complete）
+- 狀態：In progress（Task 4 verified；Checkpoint B pending）
 - 規格來源：[`SPEC.md`](../SPEC.md)
 - 任務清單：[`tasks/todo.md`](todo.md)
 
@@ -122,16 +122,16 @@ flowchart TD
 
 **Acceptance criteria:**
 
-- [ ] 升級前後的 module graph、raw／normalized `govulncheck v1.6.0` 與 exit status 已保存。
-- [ ] versions 為 `x/crypto v0.52.0`、`x/net v0.55.0`、`x/sys v0.45.0`、`x/mod v0.35.0`、`x/sync v0.20.0`、`x/text v0.37.0`、`x/tools v0.44.0`；Go/toolchain 與無關 dependencies 不變。
-- [ ] tests、race、vet、coverage ≥ `53.3%`、四平台 builds 全部通過，且沒有新增 symbol-level finding。
-- [ ] evidence 完成後才 stage；`VERIFIED_TREE=$(git write-tree)` 保存於 repo 外，不再修改 staged tree。
+- [x] 升級前後的 module graph、raw／normalized `govulncheck v1.6.0` 與 exit status 已保存。
+- [x] versions 為 `x/crypto v0.52.0`、`x/net v0.55.0`、`x/sys v0.45.0`、`x/mod v0.35.0`、`x/sync v0.20.0`、`x/text v0.37.0`、`x/tools v0.44.0`；Go/toolchain 與無關 dependencies 不變。
+- [x] tests、race、vet、coverage ≥ `53.3%`、四平台 builds 全部通過，且沒有新增 symbol-level finding。
+- [x] evidence 完成後才 stage；`VERIFIED_TREE=$(git write-tree)` 保存於 repo 外，不再修改 staged tree。
 
 **Verification:**
 
-- [ ] 執行 `SPEC.md` 的 Baseline、Coverage、Build Matrix 與 Vulnerability Verification 命令。
-- [ ] 執行 pinned `go get`、`go mod tidy -diff`、`go list -m all` 與 filtered `go mod graph`。
-- [ ] `gofmt -l .` 無輸出，`git diff --check` 通過。
+- [x] 執行 `SPEC.md` 的 Baseline、Coverage、Build Matrix 與 Vulnerability Verification 命令。
+- [x] 執行 pinned `go get`、`go mod tidy -diff`、`go list -m all` 與 filtered `go mod graph`。
+- [x] `gofmt -l .` 無輸出，`git diff --check` 通過。
 
 **Dependencies:** Tasks 1–3、Checkpoint A
 
