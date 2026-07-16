@@ -2,7 +2,7 @@
 
 ## Status
 
-- 狀態：Awaiting human review
+- 狀態：In progress（Task 1 complete）
 - 規格來源：[`SPEC.md`](../SPEC.md)
 - 任務清單：[`tasks/todo.md`](todo.md)
 
@@ -54,12 +54,12 @@ flowchart TD
 
 **Acceptance criteria:**
 
-- [ ] 頂層 `TestWebApplicationType` 透過既有 `spec.Run` 執行四個情境。
-- [ ] production logic 不變，測試後 `ResolveWebAppType` 已還原。
+- [x] 頂層 `TestWebApplicationType` 透過既有 `spec.Run` 執行四個情境。
+- [x] production logic 不變，測試後 `ResolveWebAppType` 已還原。
 
 **Verification:**
 
-- [ ] `GOTOOLCHAIN=go1.25.9 go test -count=1 -run '^TestWebApplicationType$' ./boot/helper`
+- [x] `GOTOOLCHAIN=go1.25.9 go test -count=1 -run '^TestWebApplicationType$' ./boot/helper`
 
 **Dependencies:** None
 

@@ -1,9 +1,9 @@
 # Task List: Issue #67 Go 套件風險修正
 
-狀態：Awaiting human review。詳細驗收與命令見 [`tasks/plan.md`](plan.md)。
+狀態：In progress。詳細驗收與命令見 [`tasks/plan.md`](plan.md)。
 
-- [ ] Plan Gate — Human 核准計畫。
-- [ ] T1 — 啟用 Spring WebApplicationType 契約。
+- [x] Plan Gate — Human 核准計畫。
+- [x] T1 — 啟用 Spring WebApplicationType 契約。
 - [ ] T2 — 建立完整編排與 Linux canonical 契約。
 - [ ] T3 — 建立憑證載入契約。
 - [ ] Checkpoint A — 現行依賴上的 contracts 通過。
