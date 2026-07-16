@@ -2,7 +2,7 @@
 
 ## Status
 
-- 狀態：In progress（Task 2 complete）
+- 狀態：In progress（Checkpoint A complete）
 - 規格來源：[`SPEC.md`](../SPEC.md)
 - 任務清單：[`tasks/todo.md`](todo.md)
 
@@ -94,13 +94,13 @@ flowchart TD
 
 **Acceptance criteria:**
 
-- [ ] loader 成功，且可寫的暫存 truststore digest 在執行後改變。
-- [ ] fixtures 只含公開憑證與測試密碼 `changeit`，不讀 host CA store 或加入 direct test dependency。
+- [x] loader 成功，且可寫的暫存 truststore digest 在執行後改變。
+- [x] fixtures 只含公開憑證與 `libjvm v1.46.0` 要求的 passwordless PKCS#12，不讀 host CA store 或加入 direct test dependency。
 
 **Verification:**
 
-- [ ] `GOTOOLCHAIN=go1.25.9 go test -count=1 -run '^TestCalculator_Execute_CertificateLoaderContract$' ./calc`
-- [ ] 人工確認 fixtures 不含 private key 或正式秘密。
+- [x] `GOTOOLCHAIN=go1.25.9 go test -count=1 -run '^TestCalculator_Execute_CertificateLoaderContract$' ./calc`
+- [x] `openssl pkcs12 -info` 與 PEM 內容確認 fixtures 不含 private key 或正式秘密。
 
 **Dependencies:** Task 2
 
@@ -110,9 +110,9 @@ flowchart TD
 
 ## Checkpoint A: Contracts Before Upgrade
 
-- [ ] Tasks 1–3 在現行依賴上通過；Linux test 已實際執行，不以 cross-compile 取代。
-- [ ] 既有 74 tests 未移除或弱化。
-- [ ] 若需要 production seam、workflow 修改或新 dependency，停止並先取得確認。
+- [x] Tasks 1–3 在現行依賴上通過；Linux test 已實際執行，不以 cross-compile 取代。
+- [x] 既有 74 tests 未移除或弱化。
+- [x] 未新增 production seam、workflow 修改或 dependency。
 
 ## Phase 2: Upgrade and Verify
 
