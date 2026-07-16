@@ -2,7 +2,7 @@
 
 ## Status
 
-- 狀態：In progress（Task 1 complete）
+- 狀態：In progress（Task 2 complete）
 - 規格來源：[`SPEC.md`](../SPEC.md)
 - 任務清單：[`tasks/todo.md`](todo.md)
 
@@ -73,14 +73,14 @@ flowchart TD
 
 **Acceptance criteria:**
 
-- [ ] 暫存 `JAVA_HOME`、application paths、security properties、memory limit 與 loaded-class-count 完全隔離。
-- [ ] 通用案例斷言 export 格式、必要 options、唯一性與優先順序。
-- [ ] Linux amd64 案例無 resolver error，並斷言完整、順序固定的 `JAVA_TOOL_OPTIONS`。
+- [x] 暫存 `JAVA_HOME`、application paths、security properties、memory limit 與 loaded-class-count 完全隔離。
+- [x] 通用案例斷言 export 格式、必要 options、唯一性與優先順序。
+- [x] Linux amd64 案例無 resolver error，並斷言完整、順序固定的 `JAVA_TOOL_OPTIONS`。
 
 **Verification:**
 
-- [ ] `GOTOOLCHAIN=go1.25.9 go test -count=1 -run '^TestRun_' .`
-- [ ] Linux amd64：`GOTOOLCHAIN=go1.25.9 go test -count=1 -run '^TestRun_LinuxResolverContract$' .`
+- [x] `GOTOOLCHAIN=go1.25.9 go test -count=1 -run '^TestRun_' .`
+- [x] Linux amd64：`GOTOOLCHAIN=go1.25.9 go test -count=1 -run '^TestRun_LinuxResolverContract$' .`
 
 **Dependencies:** Task 1
 

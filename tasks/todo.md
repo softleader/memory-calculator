@@ -4,7 +4,7 @@
 
 - [x] Plan Gate — Human 核准計畫。
 - [x] T1 — 啟用 Spring WebApplicationType 契約。
-- [ ] T2 — 建立完整編排與 Linux canonical 契約。
+- [x] T2 — 建立完整編排與 Linux canonical 契約。
 - [ ] T3 — 建立憑證載入契約。
 - [ ] Checkpoint A — 現行依賴上的 contracts 通過。
 - [ ] T4 — 升級 module closure 並完成原始碼驗收。
