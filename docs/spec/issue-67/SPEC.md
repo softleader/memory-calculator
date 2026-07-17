@@ -96,7 +96,6 @@ GOTOOLCHAIN=go1.25.9 go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
 - `go.mod`／`go.sum`：目標 module closure。
 - `boot/helper/*_test.go`：啟用既有 specs。
 - `main*_test.go`、`calc/*_test.go`、`calc/testdata/`：最小 production-path 契約測試與 test-only fixtures。
-- `tasks/evidence/issue-67-source.md`：升級前後的原始碼驗收證據。
 
 ## Code Style
 

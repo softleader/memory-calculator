@@ -4,7 +4,7 @@
 
 - 狀態：In progress（Task 4 verified；Checkpoint B pending）
 - 規格來源：[`SPEC.md`](../SPEC.md)
-- 任務清單：[`tasks/todo.md`](todo.md)
+- 任務清單：[`todo.md`](todo.md)
 
 ## Overview
 
@@ -118,14 +118,14 @@ flowchart TD
 
 ### Task 4: 升級 module closure 並完成原始碼驗收
 
-**Description:** 先保存升級前 baseline，再更新核准 module closure；完成全部驗證與 evidence 後 stage 精確檔案，保存 `git write-tree` 作為唯一已驗證 tree。
+**Description:** 先執行升級前 baseline，再更新核准 module closure；完成全部驗證後 stage 精確檔案，保存 `git write-tree` 作為唯一已驗證 tree。
 
 **Acceptance criteria:**
 
-- [x] 升級前後的 module graph、raw／normalized `govulncheck v1.6.0` 與 exit status 已保存。
+- [x] 已比對升級前後的 module graph、raw／normalized `govulncheck v1.6.0` 與 exit status。
 - [x] versions 為 `x/crypto v0.52.0`、`x/net v0.55.0`、`x/sys v0.45.0`、`x/mod v0.35.0`、`x/sync v0.20.0`、`x/text v0.37.0`、`x/tools v0.44.0`；Go/toolchain 與無關 dependencies 不變。
 - [x] tests、race、vet、coverage ≥ `53.3%`、四平台 builds 全部通過，且沒有新增 symbol-level finding。
-- [x] evidence 完成後才 stage；`VERIFIED_TREE=$(git write-tree)` 保存於 repo 外，不再修改 staged tree。
+- [x] 完整驗證後才 stage；`VERIFIED_TREE=$(git write-tree)` 保存於 repo 外，不再修改 staged tree。
 
 **Verification:**
 
@@ -135,13 +135,13 @@ flowchart TD
 
 **Dependencies:** Tasks 1–3、Checkpoint A
 
-**Files likely touched:** `go.mod`、`go.sum`、`tasks/evidence/issue-67-source.md`
+**Files likely touched:** `go.mod`、`go.sum`
 
-**Estimated scope:** M — 3 files plus verification matrix
+**Estimated scope:** M — 2 files plus verification matrix
 
 ## Checkpoint B: Commit Authorization
 
-- [ ] Human 已審查 module diff、source evidence 與 `$VERIFIED_TREE`。
+- [ ] Human 已審查 module diff、驗證結果與 `$VERIFIED_TREE`。
 - [ ] Human 明確授權 commit、push 與 PR。
 
 ## Phase 3: Publish and Accept

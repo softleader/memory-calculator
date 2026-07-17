@@ -1,6 +1,6 @@
 # Task List: Issue #67 Go 套件風險修正
 
-狀態：In progress。詳細驗收與命令見 [`tasks/plan.md`](plan.md)。
+狀態：In progress。詳細驗收與命令見 [`plan.md`](plan.md)。
 
 - [x] Plan Gate — Human 核准計畫。
 - [x] T1 — 啟用 Spring WebApplicationType 契約。
