@@ -65,13 +65,19 @@ func main() {
 		boot:     boot.NewSpringOptimizer(logger),
 		calc:     calc.NewCalculator(logger),
 	}
+	if err := newCommand(&c).Execute(); err != nil {
+		os.Exit(1)
+	}
+}
+
+func newCommand(c *config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "memory-calculator",
 		Short:        "JVM Memory Calculator",
 		Long:         desc,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return run(c)
+			return run(*c)
 		},
 	}
 	f := cmd.Flags()
@@ -94,9 +100,7 @@ func main() {
 	f.BoolVar(&c.version, "version", c.version, "print version and exit")
 	f.BoolVar(&c.platform, "platform", c.platform, "print os/arch and exit")
 	f.BoolVar(&c.enablePreview, "enable-preview", c.enablePreview, "enables preview features")
-	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
-	}
+	return cmd
 }
 
 func run(c config) error {

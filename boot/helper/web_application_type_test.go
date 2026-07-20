@@ -13,6 +13,13 @@ import (
 	springboot "github.com/paketo-buildpacks/spring-boot/v5/boot"
 )
 
+func TestWebApplicationType(t *testing.T) {
+	original := boot.ResolveWebAppType
+	t.Cleanup(func() { boot.ResolveWebAppType = original })
+
+	spec.Run(t, "WebApplicationType", testWebApplicationType)
+}
+
 func testWebApplicationType(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = gomega.NewWithT(t).Expect
