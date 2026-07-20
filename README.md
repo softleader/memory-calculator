@@ -68,6 +68,7 @@ Non-Heap = Direct Memory + Metaspace + Reserved Code Cache + (Thread Stack * Thr
 | 是否啟用 [NMT](https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/tooldescr007.html) | `--enable-nmt` | `$BPL_JAVA_NMT_ENABLED` | `false` |
 | 是否啟用 [JFR](https://docs.oracle.com/javacomponents/jmc-5-4/jfr-runtime-guide/about.htm) | `--enable-jfr` | `$BPL_JFR_ENABLED` | `false` |
 | 是否啟用 [JMX](https://www.oracle.com/java/technologies/javase/javamanagement.html) | `--enable-jmx` | `$BPL_JMX_ENABLED` | `false` |
+| 是否輸出詳細記錄 | `--verbose`, `-v` | `$BP_DEBUG` 有設定，或 `$BP_LOG_LEVEL` 為 `DEBUG` (不分大小寫) | `false` |
 
 執行以下指令以查看完整的 args 參數說明:
 
