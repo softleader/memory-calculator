@@ -2,7 +2,6 @@ package calc
 
 import (
 	"os"
-	"strconv"
 	"testing"
 )
 
@@ -45,7 +44,6 @@ func TestEnableJmx_ContributeTrue(t *testing.T) {
 	}
 
 	verifyJmxEnvVar(t, EnvEnableJmx, "true")
-	verifyJmxEnvVar(t, envBplDebugPort, strconv.Itoa(defaultDebugPort))
 }
 
 func TestEnableJmx_ContributeFalse(t *testing.T) {
@@ -57,7 +55,6 @@ func TestEnableJmx_ContributeFalse(t *testing.T) {
 	}
 
 	verifyJmxEnvVar(t, EnvEnableJmx, "false")
-	verifyJmxEnvVar(t, envBplDebugPort, strconv.Itoa(defaultDebugPort))
 }
 
 func verifyJmxEnvVar(t *testing.T, envVar, expectedValue string) {

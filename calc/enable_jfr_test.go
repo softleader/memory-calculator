@@ -2,7 +2,6 @@ package calc
 
 import (
 	"os"
-	"strconv"
 	"testing"
 )
 
@@ -45,7 +44,6 @@ func TestEnableJfr_ContributeTrue(t *testing.T) {
 	}
 
 	verifyJfrEnvVar(t, EnvEnableJfr, "true")
-	verifyJfrEnvVar(t, envBplDebugPort, strconv.Itoa(defaultDebugPort))
 }
 
 func TestEnableJfr_ContributeFalse(t *testing.T) {
@@ -57,7 +55,6 @@ func TestEnableJfr_ContributeFalse(t *testing.T) {
 	}
 
 	verifyJfrEnvVar(t, EnvEnableJfr, "false")
-	verifyJfrEnvVar(t, envBplDebugPort, strconv.Itoa(defaultDebugPort))
 }
 
 func verifyJfrEnvVar(t *testing.T, envVar, expectedValue string) {

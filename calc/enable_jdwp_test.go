@@ -40,6 +40,7 @@ func TestEnableJdwp_ContributeTrue(t *testing.T) {
 	jdwp := EnableJdwp(true)
 	err := jdwp.Contribute()
 	defer os.Unsetenv(EnvEnableJdwp)
+	defer os.Unsetenv(envBplDebugPort)
 	if err != nil {
 		t.Fatalf("Contribute returned an error: %v", err)
 	}
@@ -52,6 +53,7 @@ func TestEnableJdwp_ContributeFalse(t *testing.T) {
 	jdwp := EnableJdwp(false)
 	err := jdwp.Contribute()
 	defer os.Unsetenv(EnvEnableJdwp)
+	defer os.Unsetenv(envBplDebugPort)
 	if err != nil {
 		t.Fatalf("Contribute returned an error: %v", err)
 	}
