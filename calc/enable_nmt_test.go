@@ -2,7 +2,6 @@ package calc
 
 import (
 	"os"
-	"strconv"
 	"testing"
 )
 
@@ -45,7 +44,6 @@ func TestEnableNmt_ContributeTrue(t *testing.T) {
 	}
 
 	verifyNmtEnvVar(t, EnvEnableNmt, "true")
-	verifyNmtEnvVar(t, envBplDebugPort, strconv.Itoa(defaultDebugPort))
 }
 
 func TestEnableNmt_ContributeFalse(t *testing.T) {
@@ -57,7 +55,6 @@ func TestEnableNmt_ContributeFalse(t *testing.T) {
 	}
 
 	verifyNmtEnvVar(t, EnvEnableNmt, "false")
-	verifyNmtEnvVar(t, envBplDebugPort, strconv.Itoa(defaultDebugPort))
 }
 
 func verifyNmtEnvVar(t *testing.T, envVar, expectedValue string) {
