@@ -41,11 +41,7 @@ func (j *JVMCacerts) Contribute() error {
 	if s := j.String(); s == "" {
 		if javaHome, ok := os.LookupEnv(envJavaHome); ok {
 			cacert := filepath.Join(javaHome, subPathCacerts)
-			f, err := os.Open(cacert)
-			if err == nil {
-				defer func(f *os.File) {
-					_ = f.Close()
-				}(f)
+			if fi, err := os.Stat(cacert); err == nil && !fi.IsDir() {
 				*j = JVMCacerts(cacert)
 			}
 		}
