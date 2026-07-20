@@ -2,13 +2,13 @@
 
 ## Status
 
-- 狀態：In progress（Task 4 verified；Checkpoint B pending）
+- 狀態：原始碼驗收完成；發布驗收尚未完成。
 - 規格來源：[`SPEC.md`](../SPEC.md)
 - 任務清單：[`todo.md`](todo.md)
 
 ## Overview
 
-先在現行依賴上鎖定 production-path 契約，再升級核准的最小 module closure 並執行一次完整驗收。驗證完成的 staged tree 會直接成為 commit；其後依序建立 PR、GitHub Release `1.2.6`，最後等待下游 Harbor 回填。
+先在現行依賴上鎖定 production-path 契約，再升級核准的最小 module closure 並完成原始碼驗收。發布驗收仍以 GitHub Release `1.2.6`、binary build info 與下游 Harbor 回填為必要閘門；PR／Issue 的即時狀態以 GitHub 為準。
 
 ## Component Dependency Graph
 
@@ -69,12 +69,12 @@ flowchart TD
 
 ### Task 2: 建立完整編排與 Linux canonical 契約
 
-**Description:** 以 child process 和 production `config` 走完 `prep → boot → calc → out`；通用案例驗證輸出與優先語意，Linux 案例同時讀取 `/etc/resolv.conf` 並固定完整 JVM options 字串。
+**Description:** 以 child process、production `NewPreparerManager` 與 production Cobra `newCommand`／`SetArgs` 走完 `prep → boot → calc → out`；通用案例經 `--loaded-class-count` 驗證輸出與優先語意，Linux 案例同時讀取 `/etc/resolv.conf` 並固定完整 JVM options 字串。
 
 **Acceptance criteria:**
 
 - [x] 暫存 `JAVA_HOME`、application paths、security properties、memory limit 與 loaded-class-count 完全隔離。
-- [x] 通用案例斷言 export 格式、必要 options、唯一性與優先順序。
+- [x] 通用案例透過 production Cobra `newCommand`／`SetArgs` 的 `--loaded-class-count` 路徑斷言 export 格式、必要 options、唯一性與優先順序。
 - [x] Linux amd64 案例無 resolver error，並斷言完整、順序固定的 `JAVA_TOOL_OPTIONS`。
 
 **Verification:**
@@ -141,25 +141,25 @@ flowchart TD
 
 ## Checkpoint B: Commit Authorization
 
-- [ ] Human 已審查 module diff、驗證結果與 `$VERIFIED_TREE`。
-- [ ] Human 明確授權 commit、push 與 PR。
+- [x] Human 已審查 module diff、驗證結果與 `$VERIFIED_TREE`。
+- [x] Human 明確授權 commit、push 與 PR。
 
 ## Phase 3: Publish and Accept
 
-### Task 5: 建立並合併 Issue #67 PR
+### Task 5: 建立 PR 並完成合併前驗證／處理 review feedback
 
-**Description:** 將已驗證 staged tree 原樣 commit；tree identity 相同才 push、建立 PR 並等待 CI／human review。
+**Description:** 將已驗證 staged tree 原樣 commit；tree identity 相同才 push、建立 PR，完成合併前 CI／human review 驗證並收斂 review feedback。合併是 release gate 的前置條件，不在本任務中假定為已發生的即時狀態。
 
 **Acceptance criteria:**
 
-- [ ] commit 前 invoke `engineering:git-commit-co-author` skill。
-- [ ] `git rev-parse 'HEAD^{tree}'` 等於 `$VERIFIED_TREE`；不同即停止並重新驗證。
-- [ ] PR title 通過 Conventional Commits check，CI／human review 通過後才合併。
+- [x] commit 前 invoke `engineering:git-commit-co-author` skill。
+- [x] `git rev-parse 'HEAD^{tree}'` 等於 `$VERIFIED_TREE`；不同即停止並重新驗證。
+- [x] PR #68 已建立，PR title 通過 Conventional Commits check，合併前 CI／human review 驗證與 review feedback 收斂已完成。
 
 **Verification:**
 
-- [ ] `echo "$PR_TITLE" | npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --extends @commitlint/config-conventional`
-- [ ] `gh pr checks <PR>` 全部通過。
+- [x] `echo "$PR_TITLE" | npx --yes -p @commitlint/cli -p @commitlint/config-conventional commitlint --extends @commitlint/config-conventional`
+- [x] `gh pr checks <PR>` 合併前驗證時全部通過。
 
 **Dependencies:** Task 4、Checkpoint B、明確授權
 
@@ -168,6 +168,8 @@ flowchart TD
 **Estimated scope:** S — delivery operation
 
 ## Checkpoint C: Release Authorization
+
+發布驗收的外部即時狀態以 GitHub 的 PR #68／Issue #67 為準；下列項目是建立 release 前必須重新確認的 durable gate。
 
 - [ ] PR 已合併；PR head 與 merge commit 的 tree hash 相同，不同即停止發布並重新驗收候選版本。
 - [ ] `1.2.6` 尚未存在，且 Human 明確授權建立 GitHub Release。
@@ -194,7 +196,7 @@ flowchart TD
 
 ## Checkpoint D: Downstream Handoff
 
-- [ ] `1.2.6` artifact evidence 齊全，下游收到固定版本、checksum 與殘餘風險說明。
+- [ ] `1.2.6` artifact evidence 齊全；下游取得固定版本、checksum 與殘餘風險說明。
 - [ ] 本 repo 不直接操作 Harbor。
 
 ### Task 7: 收斂下游 Harbor 驗收
@@ -218,6 +220,6 @@ flowchart TD
 
 ## Checkpoint E: Complete
 
-- [ ] `SPEC.md` Success Criteria 全部具備證據。
+- [ ] `SPEC.md` 的 release 與下游 Harbor Success Criteria 全部具備證據。
 - [ ] Release commit → binary → downstream image digest 可追溯。
 - [ ] 依 `CONTEXT.md` 定義宣告「Issue #67 範圍完成」。

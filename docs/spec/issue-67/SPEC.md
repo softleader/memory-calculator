@@ -2,9 +2,10 @@
 
 ## 狀態
 
-- 階段：Plan
+- 階段：原始碼驗收完成；發布驗收尚未完成。
 - 對應議題：[softleader/memory-calculator#67](https://github.com/softleader/memory-calculator/issues/67)
-- 實作閘門：計畫需經使用者確認後，才能進入 Implement。
+- 原始碼驗收涵蓋依賴 closure、production-path 契約測試、coverage、build 與弱點檢查；GitHub Release `1.2.6`、binary build info 與下游 Harbor 驗收仍為發布閘門。
+- PR／Issue 的即時狀態以 GitHub 為準；本文件只記錄可持久的驗收邊界與證據。
 
 ## 假設
 
@@ -58,7 +59,9 @@ GOTOOLCHAIN=go1.25.9 go vet ./...
 
 ### Coverage
 
-預設 package-local coverage 僅有 `49.1%`；跨 package 合併基準為 `53.3%`，本次以後者作為相同平台的回歸比較基準。
+預設 package-local coverage 為 `49.1%`；跨 package 合併 baseline 為 `53.3%`。啟用 `TestWebApplicationType` 後，PR review 調整前的同平台 coverage 為 `56.0%`；為讓契約測試走 production Cobra binding 而抽出 `newCommand` 後，最終驗收值為 `55.9%`。在最終 tree 排除 `TestWebApplicationType` 時為 `53.2%`，因此新增的有效 coverage 仍全部來自該 specs；`newCommand` 則增加少量未由 parent profile 命中的 production statements。
+
+CLI 與 certificate 測試透過獨立 child process 執行；child process 未轉送 parent test runner 的 coverage output 設定，因此 counters 不會合併至主 coverage profile。其價值是驗證 production 行為契約，而非提高 coverage 百分比；不得將它們描述為已由 coverage profile 覆蓋 child-process 的 production code。
 
 ```sh
 GOTOOLCHAIN=go1.25.9 go test -count=1 -covermode=atomic -coverpkg='./...' -coverprofile=/tmp/memory-calculator-coverage.out ./...
@@ -114,9 +117,10 @@ GOTOOLCHAIN=go1.25.9 go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
 ### Baseline Evidence
 
 - 現有 74 個 Go tests 全部通過。
-- 同一平台的跨 package statement coverage 基準為 `53.3%`。
+- 同一平台的跨 package statement coverage baseline 為 `53.3%`；最終原始碼驗收為 `55.9%`。最終 tree 排除 `TestWebApplicationType` 時為 `53.2%`，新增的有效 coverage 來自啟用該 specs。
 - `calc.Calculator.Execute` 為 `77.8%`，但 `main`／`run`／`out`、`SpringOptimizer.Execute` 目前為 `0%`。
 - 將 `x/crypto`、`x/net`、`x/sys` 納入 instrumentation 時，現有測試對其執行 coverage 為 `0%`。
+- CLI 與 certificate child-process 契約測試未轉送 parent test runner 的 coverage output 設定，counters 不會合併至主 coverage profile；以行為斷言驗收，不以 coverage 百分比代表其 child-process production code 覆蓋。
 
 ### Test Levels
 
@@ -145,7 +149,7 @@ GOTOOLCHAIN=go1.25.9 go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
 
 5. **Static／runtime verification**
    - `go vet ./...`、`go test -race ./...`、四個發布平台 build 均需通過。
-   - 同平台 `-coverpkg='./...'` coverage 不得低於 `53.3%`；新增測試應提高關鍵路徑覆蓋，不以追求任意全域百分比取代行為斷言。
+   - 同平台 `-coverpkg='./...'` coverage 不得低於 `53.3%`；關鍵路徑必須有行為契約，即使 child-process counters 不會合併至主 profile，也不得以追求任意全域百分比取代行為斷言。
    - 以固定的 `govulncheck v1.6.0` 比較升級前後結果，不得新增 symbol-level findings；既有 6 個 findings 明列為本次非阻斷的後續事項。
 
 6. **Downstream artifact security verification**
@@ -187,20 +191,20 @@ GOTOOLCHAIN=go1.25.9 go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
 
 ## Success Criteria
 
-- [ ] `go list -m all` 顯示 `golang.org/x/crypto >= v0.52.0`。
-- [ ] `go list -m all` 顯示 `golang.org/x/net >= v0.55.0`。
-- [ ] `go list -m all` 顯示 `golang.org/x/sys >= v0.45.0`。
-- [ ] 除 solver 必要調整外，沒有無關依賴、Go toolchain 或 production behavior 變更。
-- [ ] 既有 74 個 tests 與新增 tests 全部通過。
-- [ ] `WebApplicationType` 現有 specs 已由 Go test runner 執行。
-- [ ] CLI／orchestration canonical 測試鎖定完整 JVM options 字串與順序，其他案例驗證必要參數、優先順序與輸出語意。
-- [ ] 有效憑證案例實際執行 certificate loader 並通過。
-- [ ] Linux 契約層測試已執行完整 `Calculator.Execute`，並驗證無 resolver error 與穩定的 JVM options。
-- [ ] 相同平台的跨 package coverage 不低於 baseline `53.3%`，且關鍵 0% 路徑已有行為測試。
-- [ ] `go vet ./...`、`go test -race ./...` 與 Linux／macOS amd64／arm64 builds 全部通過。
-- [ ] 固定版 `govulncheck v1.6.0` 的前後結果已保存，且沒有因本次升級新增 symbol-level findings。
-- [ ] Go `1.25.9` 與 `go-pkcs12 v0.6.0` 的 6 個既有 symbol-level findings 已記錄為 Issue #67 範圍外的後續事項。
-- [ ] `GO-2026-5932` 的無修復狀態與追蹤方式已明確記錄。
+- [x] `go list -m all` 顯示 `golang.org/x/crypto >= v0.52.0`。
+- [x] `go list -m all` 顯示 `golang.org/x/net >= v0.55.0`。
+- [x] `go list -m all` 顯示 `golang.org/x/sys >= v0.45.0`。
+- [x] 除 solver 必要調整外，沒有無關依賴、Go toolchain 或 production behavior 變更。
+- [x] 既有 74 個 tests 與新增 tests 全部通過。
+- [x] `WebApplicationType` 現有 specs 已由 Go test runner 執行。
+- [x] CLI／orchestration canonical 測試透過 production Cobra command 的 `--loaded-class-count` 路徑鎖定完整 JVM options 字串與順序，其他案例驗證必要參數、優先順序與輸出語意。
+- [x] 有效憑證案例實際執行 certificate loader 並通過。
+- [x] Linux 契約層測試已執行完整 `Calculator.Execute`，並驗證無 resolver error 與穩定的 JVM options。
+- [x] 相同平台的跨 package coverage 為 `55.9%`，不低於 baseline `53.3%`；關鍵路徑已有行為測試。
+- [x] `go vet ./...`、`go test -race ./...` 與 Linux／macOS amd64／arm64 builds 全部通過。
+- [x] 固定版 `govulncheck v1.6.0` 的前後結果已保存，且沒有因本次升級新增 symbol-level findings。
+- [x] Go `1.25.9` 與 `go-pkcs12 v0.6.0` 的 6 個既有 symbol-level findings 已記錄為 Issue #67 範圍外的後續事項。
+- [x] `GO-2026-5932` 的無修復狀態與追蹤方式已明確記錄。
 - [ ] GitHub patch release `1.2.6` 已建立，四個 GoReleaser 平台產物與 checksums 均存在。
 - [ ] `1.2.6` binary 的實際 Go build info 已記錄於驗收證據。
 - [ ] 下游維護者已使用 `1.2.6` 完成映像重建與 Harbor 重掃，回填結果不再包含 issue #67 中已有修復版本的 CVE。
