@@ -116,7 +116,6 @@ func run(c config) error {
 	if c.verbose {
 		c.calc.Verbose.Set(c.verbose)
 		c.prep.Verbose = c.verbose
-		c.boot.Verbose = c.verbose
 	}
 
 	if c.enablePreview {

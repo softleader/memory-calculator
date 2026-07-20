@@ -12,7 +12,6 @@ type SpringOptimizer struct {
 	Logger         bard.Logger
 	AppClassesPath *AppClassesPath
 	AppLibPath     *AppLibPath
-	Verbose        bool
 }
 
 func NewSpringOptimizer(logger bard.Logger) SpringOptimizer {
