@@ -52,41 +52,26 @@ func TestRun_ChildProcess(t *testing.T) {
 
 	root := os.Getenv(runRootEnv)
 	logger := bard.NewLogger(io.Discard)
-	optimizer := boot.NewSpringOptimizer(logger)
-	if err := optimizer.AppClassesPath.Set(filepath.Join(root, "classes")); err != nil {
-		t.Fatal(err)
-	}
-	if err := optimizer.AppLibPath.Set(filepath.Join(root, "libs")); err != nil {
-		t.Fatal(err)
-	}
-
 	calculator := calc.NewCalculator(logger)
 	calculator.MemoryLimitPath.V1 = filepath.Join(root, "memory.limit")
 	calculator.MemoryLimitPath.V2 = filepath.Join(root, "missing-memory-limit")
-	if err := calculator.LoadedClassCount.Set("42"); err != nil {
-		t.Fatal(err)
-	}
-	if err := calculator.ThreadCount.Set("10"); err != nil {
-		t.Fatal(err)
-	}
-	if err := calculator.EnableJdwp.Set("false"); err != nil {
-		t.Fatal(err)
-	}
 
 	c := config{
-		output: filepath.Join(root, "memory.env"),
 		logger: logger,
-		prep: prep.PreparerManager{
-			Logger: logger,
-			Preparers: []prep.Preparer{
-				prep.NewJavaSecurityProperties(logger, root),
-				prep.NewJrePreparer(logger),
-			},
-		},
-		boot: optimizer,
-		calc: calculator,
+		prep:   prep.NewPreparerManager(logger),
+		boot:   boot.NewSpringOptimizer(logger),
+		calc:   calculator,
 	}
-	if err := run(c); err != nil {
+	cmd := newCommand(&c)
+	cmd.SetArgs([]string{
+		"--loaded-class-count=42",
+		"--thread-count=10",
+		"--enable-jdwp=false",
+		"--app-classes-path=" + filepath.Join(root, "classes"),
+		"--app-lib-path=" + filepath.Join(root, "libs"),
+		"--output=" + filepath.Join(root, "memory.env"),
+	})
+	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
 	}
 	if got := os.Getenv(calc.EnvLoadedClassCount); got != "42" {
@@ -113,6 +98,9 @@ func newRunFixture(t *testing.T) string {
 	); err != nil {
 		t.Fatal(err)
 	}
+	if err := os.WriteFile(filepath.Join(root, "java-security.properties"), nil, 0o644); err != nil {
+		t.Fatal(err)
+	}
 	if err := os.WriteFile(filepath.Join(root, "memory.limit"), []byte("10g"), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +115,7 @@ func runContractChild(t *testing.T, root string) {
 		runRootEnv + "=" + root,
 		"HOME=" + root,
 		"JAVA_HOME=" + filepath.Join(root, "java-home"),
-		"JAVA_TOOL_OPTIONS=" + runInitialOptions,
+		"JAVA_TOOL_OPTIONS=" + runInitialOptions + " -Djava.security.properties=" + filepath.Join(root, "java-security.properties"),
 		calc.EnvLoadedClassCount + "=41",
 	}
 	if output, err := cmd.CombinedOutput(); err != nil {
