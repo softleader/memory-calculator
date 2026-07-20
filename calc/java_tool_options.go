@@ -22,7 +22,7 @@ func BuildJavaToolOptions() *JavaToolOptions {
 		o = val
 	}
 	for _, option := range ContributeOptions {
-		if !strings.Contains(o, option) {
+		if !containsOption(o, option) {
 			if o == "" {
 				o = option
 			} else {
@@ -54,6 +54,15 @@ func (j *JavaToolOptions) WriteFile(file string) error {
 		return fmt.Errorf("failed to write file %v: %v", file, err)
 	}
 	return nil
+}
+
+func containsOption(existing, option string) bool {
+	for _, tok := range strings.Fields(existing) {
+		if tok == option {
+			return true
+		}
+	}
+	return false
 }
 
 func closeFile(file *os.File) {

@@ -32,7 +32,6 @@ type Calculator struct {
 	Logger bard.Logger
 	// MemoryLimitPath 一般情境不需要調整, 開出來是讓 test 時可以設定細節
 	MemoryLimitPath *MemoryLimitPath
-	//
 
 	JVMOptions       *JVMOptions
 	HeadRoom         *HeadRoom
@@ -155,21 +154,19 @@ func (c *Calculator) buildHelpers() (h map[string]sherpa.ExecD, err error) {
 		helperJvmHeap:                     jh,
 		helperLinkLocalDns:                d,
 		helperMemoryCalculator:            m,
-		helperOpensslCertificateLoader:    o,
 		helperSecurityProvidersClasspath9: s9,
 		helperSecurityProvidersConfigurer: spc,
 		helperDebug9:                      d9,
 		helperJmx:                         jm,
-		helperNmt:                         n,
 		helperJfr:                         jf,
 	}
 	// 底層的實作中要求若開啟 jvm-cacert 則必須要設定相關的系統參數, 否則會報錯, 所以針對這個改成沒設定就不要跑了
-	if *c.JVMCacerts == "" {
-		delete(h, helperOpensslCertificateLoader)
+	if *c.JVMCacerts != "" {
+		h[helperOpensslCertificateLoader] = o
 	}
 	// 由於關閉 nmt 底層會印出一些關閉的 log, 我不想要看到那些, 所以針對這個改成沒開啟就不要跑了
-	if !*c.EnableNmt {
-		delete(h, helperNmt)
+	if *c.EnableNmt {
+		h[helperNmt] = n
 	}
 	return h, nil
 }
