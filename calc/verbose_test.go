@@ -7,6 +7,7 @@ import (
 
 func TestNewVerbose_NoEnvVar(t *testing.T) {
 	os.Unsetenv(EnvVerbose)
+	os.Unsetenv(EnvDebug)
 	defer os.Unsetenv(EnvVerbose)
 
 	v := NewVerbose()
@@ -18,6 +19,27 @@ func TestNewVerbose_NoEnvVar(t *testing.T) {
 func TestNewVerbose_EnvVarSetDebug(t *testing.T) {
 	os.Setenv(EnvVerbose, levelDebug)
 	defer os.Unsetenv(EnvVerbose)
+
+	v := NewVerbose()
+	if !*v {
+		t.Errorf("Expected true, got %v", *v)
+	}
+}
+
+func TestNewVerbose_EnvVarSetDebugLowercase(t *testing.T) {
+	os.Setenv(EnvVerbose, "debug")
+	defer os.Unsetenv(EnvVerbose)
+
+	v := NewVerbose()
+	if !*v {
+		t.Errorf("Expected true, got %v", *v)
+	}
+}
+
+func TestNewVerbose_BPDebugSet(t *testing.T) {
+	os.Unsetenv(EnvVerbose)
+	os.Setenv(EnvDebug, "")
+	defer os.Unsetenv(EnvDebug)
 
 	v := NewVerbose()
 	if !*v {
@@ -50,6 +72,7 @@ func TestVerbose_ContributeTrue(t *testing.T) {
 }
 
 func TestVerbose_ContributeFalse(t *testing.T) {
+	os.Unsetenv(EnvVerbose)
 	v := Verbose(false)
 	err := v.Contribute()
 	defer os.Unsetenv(EnvVerbose)

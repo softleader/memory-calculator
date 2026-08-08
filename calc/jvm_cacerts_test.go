@@ -74,6 +74,33 @@ func TestContribute_JVMCacertsEmptyAndJavaHomeSet(t *testing.T) {
 	}
 }
 
+func TestContribute_JVMCacertsPathIsDirectory(t *testing.T) {
+	javaHomePath, err := os.MkdirTemp("", "fake-java-home")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+	defer os.RemoveAll(javaHomePath)
+	cacert := filepath.Join(javaHomePath, subPathCacerts)
+	if err = os.MkdirAll(cacert, 0755); err != nil {
+		t.Fatalf("Failed to create cacert as directory: %v", err)
+	}
+
+	os.Unsetenv(EnvJVMCacerts)
+	j := NewJVMCacerts()
+	os.Setenv(envJavaHome, javaHomePath)
+	defer os.Unsetenv(envJavaHome)
+
+	err = j.Contribute()
+	defer os.Unsetenv(EnvJVMCacerts)
+	if err != nil {
+		t.Errorf("Contribute returned error: %v", err)
+	}
+
+	if _, ok := os.LookupEnv(EnvJVMCacerts); ok {
+		t.Errorf("Expected environment variable %v not to be set when cacerts path is a directory", EnvJVMCacerts)
+	}
+}
+
 func TestContribute_JVMCacertsNotEmpty(t *testing.T) {
 	javaHomePath, err := os.MkdirTemp("", "fake-java-home")
 	if err != nil {
