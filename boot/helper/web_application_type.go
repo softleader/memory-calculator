@@ -1,6 +1,7 @@
 package boot
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/paketo-buildpacks/libpak/bard"
@@ -17,7 +18,8 @@ type WebApplicationType struct {
 func (wat WebApplicationType) Execute() (map[string]string, error) {
 	webAppType, err := ResolveWebAppType()
 	if err != nil {
-		return nil, err
+		wat.Logger.Info(fmt.Sprintf("Warning: unable to detect application type: %s; using fallback thread count 200", err))
+		return map[string]string{"BPL_JVM_THREAD_COUNT": "200"}, nil
 	}
 
 	threadCount := "200"

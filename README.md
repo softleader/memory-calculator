@@ -55,7 +55,7 @@ Non-Heap = Direct Memory + Metaspace + Reserved Code Cache + (Thread Stack * Thr
 | 參數說明 | 優先判斷 args 傳入  | 其次判斷 OS Variable | 最後的預設值或行為 |
 |---|---|---|---|
 | 記憶體計算工具分配的預留空間百分比 | `--head-room` | `$BPL_JVM_HEAD_ROOM` | `0` |
-| 運行時的用戶線程數 | `--thread-count` | `$BPL_JVM_THREAD_COUNT` | `200` |
+| 運行時的用戶線程數 | `--thread-count` | `$BPL_JVM_THREAD_COUNT` | 自動判型：50／250；偵測失敗備援：200 |
 | 運行時將加載的 class 數量 | `--loaded-class-count` | `$BPL_JVM_LOADED_CLASS_COUNT` | 若沒提供，則以 App 目錄，JVM class 數量，JVM class 數量調整，於啟動時動態的計算出建議值 |
 | App 目錄 | `--app-path` | `$BPI_APPLICATION_PATH` | `/app` |
 | App classes 目錄 | `--app-classes-path` | `$APPLICATION_CLASSES_PATH` | `/app/classes` |
@@ -154,3 +154,11 @@ curl -sL https://raw.githubusercontent.com/softleader/memory-calculator/main/ins
 **在 Dockerfile 中安裝:**
 
 參考 [`Dockerfile`](./Dockerfile)
+
+### Thread count 設定
+
+`--thread-count` 優先於 `BPL_JVM_THREAD_COUNT`；兩者都未指定時才執行 Spring 應用類型判定。非 Web 與 Reactive 應用使用 50，Servlet 應用使用 250。此值會直接影響 Thread Stack 預算與最終 Heap 大小。
+
+明確輸入必須是可解析、可表示的正整數；0、負數、空字串、非整數與超出整數範圍的值都會報錯並終止，錯誤會指出來源與輸入值。環境變數未設定與設定成空字串不同。只驗證優先序選中的來源，因此有效 CLI 可以覆蓋無效環境變數。明確指定 200 也會保留。
+
+有效的明確設定會略過為 thread count 進行的 Spring 判型。只有應用類型偵測失敗時，才使用備援 200 繼續計算，並在一般模式輸出包含失敗原因及備援值的 `Warning`，不需要開啟 verbose。正常判定非 Web 仍使用 50，不會觸發備援。其他準備、記憶體計算或檔案輸出錯誤不會套用此備援。
