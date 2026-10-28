@@ -1,0 +1,3 @@
+interface:
+  display_name: "test-design"
+  short_description: "Design tests that catch a real break."
