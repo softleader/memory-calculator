@@ -125,15 +125,13 @@ func runContractChild(t *testing.T, root string) {
 
 func readExportedJavaToolOptions(t *testing.T, root string) string {
 	t.Helper()
-	contents, err := os.ReadFile(filepath.Join(root, "memory.env"))
+	cmd := exec.CommandContext(t.Context(), "/bin/sh", "-eu", "-c",
+		`. "$1"; exec /bin/sh -eu -c 'printf "%s" "$JAVA_TOOL_OPTIONS"'`,
+		"read-options", filepath.Join(root, "memory.env"))
+	cmd.Env = []string{"PATH=/usr/bin:/bin"}
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("load exported options: %v\n%s", err, output)
 	}
-	const prefix = "export JAVA_TOOL_OPTIONS='"
-	const suffix = "'\n"
-	text := string(contents)
-	if !strings.HasPrefix(text, prefix) || !strings.HasSuffix(text, suffix) {
-		t.Fatalf("export = %q, want %q...%q", text, prefix, suffix)
-	}
-	return strings.TrimSuffix(strings.TrimPrefix(text, prefix), suffix)
+	return string(output)
 }
