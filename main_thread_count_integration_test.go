@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	springboot "github.com/paketo-buildpacks/spring-boot/v5/boot"
@@ -130,5 +131,23 @@ func TestRun_ThreadCountChild(t *testing.T) {
 	cmd.SetArgs(args)
 	if err := cmd.Execute(); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestRun_ThreadCountHelp(t *testing.T) {
+	var output bytes.Buffer
+	logger := bard.NewLogger(&output)
+	c := config{calc: calc.NewCalculator(logger), boot: boot.NewSpringOptimizer(logger)}
+	cmd := newCommand(&c)
+	cmd.SetOut(&output)
+	cmd.SetArgs([]string{"--help"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	help := output.String()
+	for _, want := range []string{"non-web/reactive: 50", "servlet: 250", "fallback: 200", "default auto"} {
+		if !strings.Contains(help, want) {
+			t.Errorf("help does not explain %q: %s", want, help)
+		}
 	}
 }

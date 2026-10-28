@@ -10,7 +10,7 @@ const (
 	DefaultThreadCount = ThreadCount(200)
 	FlagThreadCount    = "thread-count"
 	EnvThreadCount     = "BPL_JVM_THREAD_COUNT"
-	UsageThreadCount   = "the number of user threads"
+	UsageThreadCount   = "positive user thread count; overrides BPL_JVM_THREAD_COUNT and skips detection (non-web/reactive: 50, servlet: 250; detection failure fallback: 200 with Warning)"
 )
 
 type ThreadCount int

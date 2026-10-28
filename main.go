@@ -86,6 +86,7 @@ func newCommand(c *config) *cobra.Command {
 	f.Var(c.calc.JVMOptions, calc.FlagJVMOptions, calc.UsageJVMOptions)
 	f.Var(c.calc.HeadRoom, calc.FlagHeadRoom, calc.UsageHeadRoom)
 	f.Var(c.calc.ThreadCount, calc.FlagThreadCount, calc.UsageThreadCount)
+	f.Lookup(calc.FlagThreadCount).DefValue = "auto"
 	f.Var(c.calc.LoadedClassCount, calc.FlagLoadedClassCount, calc.UsageLoadedClassCount)
 	f.Var(c.calc.JVMClassCount, calc.FlagJVMClassCount, calc.UsageJVMClassCount)
 	f.Var(c.calc.JVMClassAdj, calc.FlagJVMClassAdj, calc.UsageJVMClassAdj)
