@@ -1,8 +1,6 @@
 module github.com/softleader/memory-calculator
 
-go 1.25.0
-
-toolchain go1.25.9
+go 1.26.10
 
 require (
 	github.com/magiconair/properties v1.8.10
