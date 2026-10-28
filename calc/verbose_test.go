@@ -27,8 +27,12 @@ func TestNewVerbose_EnvVarSetDebug(t *testing.T) {
 }
 
 func TestNewVerbose_EnvVarSetDebugLowercase(t *testing.T) {
-	os.Setenv(EnvVerbose, "debug")
-	defer os.Unsetenv(EnvVerbose)
+	// Register restoration before removing BP_DEBUG; an empty value still enables debug.
+	t.Setenv(EnvDebug, "")
+	if err := os.Unsetenv(EnvDebug); err != nil {
+		t.Fatalf("Failed to unset %s: %v", EnvDebug, err)
+	}
+	t.Setenv(EnvVerbose, "debug")
 
 	v := NewVerbose()
 	if !*v {
