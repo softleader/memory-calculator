@@ -49,7 +49,9 @@ func (j *JavaToolOptions) WriteFile(file string) error {
 	}
 	defer closeFile(out)
 
-	_, err = out.WriteString(fmt.Sprintf("export %v='%s'\n", EnvJavaToolOptions, j.String()))
+	// End the single-quoted segment, emit a literal apostrophe, then reopen it.
+	escaped := strings.ReplaceAll(j.String(), "'", `'"'"'`)
+	_, err = out.WriteString(fmt.Sprintf("export %v='%s'\n", EnvJavaToolOptions, escaped))
 	if err != nil {
 		return fmt.Errorf("failed to write file %v: %v", file, err)
 	}

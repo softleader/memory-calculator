@@ -77,11 +77,40 @@ func findJavaSecurityProperties(envVar string) (string, bool, error) {
 		return "", false, nil
 	}
 
-	p := strings.Fields(s)
+	// JVM environment options group whitespace with quotes. Unlike shell
+	// commands, backslashes and operators such as '&' are literal characters.
+	var options []string
+	var token strings.Builder
+	var quote rune
+	for _, r := range s {
+		switch {
+		case quote != 0:
+			if r == quote {
+				quote = 0
+			} else {
+				token.WriteRune(r)
+			}
+		case r == '\'' || r == '"':
+			quote = r
+		case strings.ContainsRune(" \t\r\n\f\v", r):
+			if token.Len() > 0 {
+				options = append(options, token.String())
+				token.Reset()
+			}
+		default:
+			token.WriteRune(r)
+		}
+	}
+	if quote != 0 {
+		return "", false, fmt.Errorf("unable to parse $%s: unmatched quote", envVar)
+	}
+	if token.Len() > 0 {
+		options = append(options, token.String())
+	}
 
-	for _, item := range p {
-		if strings.HasPrefix(item, "-Djava.security.properties=") {
-			return strings.TrimPrefix(item, "-Djava.security.properties="), true, nil
+	for _, item := range options {
+		if path, found := strings.CutPrefix(item, "-Djava.security.properties="); found {
+			return path, true, nil
 		}
 	}
 
