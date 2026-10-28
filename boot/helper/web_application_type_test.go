@@ -86,9 +86,13 @@ func testWebApplicationType(t *testing.T, context spec.G, it spec.S) {
 			}
 		})
 
-		it("returns an error", func() {
-			_, err := wat.Execute()
-			Expect(err).To(gomega.MatchError("test-error"))
+		it("exports the fallback and explains the detection failure", func() {
+			result, err := wat.Execute()
+			Expect(err).NotTo(gomega.HaveOccurred())
+			Expect(result).To(gomega.Equal(map[string]string{"BPL_JVM_THREAD_COUNT": "200"}))
+			for _, diagnostic := range []string{"Warning", "test-error", "200"} {
+				Expect(buffer.String()).To(gomega.ContainSubstring(diagnostic))
+			}
 		})
 	})
 }

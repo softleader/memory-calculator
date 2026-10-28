@@ -1,6 +1,7 @@
 package calc
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 )
@@ -24,13 +25,31 @@ func NewThreadCount() *ThreadCount {
 }
 
 func (tc *ThreadCount) Set(s string) error {
-	f, err := strconv.ParseInt(s, 10, 64)
-	if err != nil {
+	return tc.parse(s, "--"+FlagThreadCount)
+}
+
+func (tc *ThreadCount) parse(s, source string) error {
+	value, err := strconv.Atoi(s)
+	if err != nil || value <= 0 {
+		return fmt.Errorf("%s value %q must be a representable positive integer", source, s)
+	}
+	*tc = ThreadCount(value)
+	return nil
+}
+
+// Resolve selects the explicit source before invoking the detection adapter.
+// The adapter exports its result to EnvThreadCount for the JVM calculator.
+func (tc *ThreadCount) Resolve(cliExplicit bool, detect func() error) error {
+	if cliExplicit {
+		return nil
+	}
+	if value, exists := os.LookupEnv(EnvThreadCount); exists {
+		return tc.parse(value, EnvThreadCount)
+	}
+	if err := detect(); err != nil {
 		return err
 	}
-
-	*tc = ThreadCount(f)
-	return nil
+	return tc.parse(os.Getenv(EnvThreadCount), "application detection")
 }
 
 func (tc *ThreadCount) Type() string {

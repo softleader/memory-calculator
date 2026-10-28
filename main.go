@@ -43,15 +43,16 @@ var (
 )
 
 type config struct {
-	output        string
-	version       bool
-	platform      bool
-	logger        bard.Logger
-	prep          prep.PreparerManager
-	boot          boot.SpringOptimizer
-	calc          calc.Calculator
-	enablePreview bool
-	verbose       bool
+	output              string
+	version             bool
+	platform            bool
+	logger              bard.Logger
+	prep                prep.PreparerManager
+	boot                boot.SpringOptimizer
+	calc                calc.Calculator
+	enablePreview       bool
+	verbose             bool
+	threadCountExplicit bool
 }
 
 func main() {
@@ -77,6 +78,7 @@ func newCommand(c *config) *cobra.Command {
 		Long:         desc,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			c.threadCountExplicit = cmd.Flags().Changed(calc.FlagThreadCount)
 			return run(*c)
 		},
 	}
@@ -126,7 +128,7 @@ func run(c config) error {
 		return err
 	}
 
-	if err := c.boot.Execute(); err != nil {
+	if err := c.calc.ThreadCount.Resolve(c.threadCountExplicit, c.boot.Execute); err != nil {
 		return err
 	}
 
