@@ -109,13 +109,18 @@ func newRunFixture(t *testing.T) string {
 
 func runContractChild(t *testing.T, root string) {
 	t.Helper()
-	cmd := exec.Command(os.Args[0], "-test.run=^TestRun_ChildProcess$")
+	runContractChildWithOptions(t, root, runInitialOptions)
+}
+
+func runContractChildWithOptions(t *testing.T, root, initialOptions string) {
+	t.Helper()
+	cmd := exec.CommandContext(t.Context(), os.Args[0], "-test.run=^TestRun_ChildProcess$")
 	cmd.Env = []string{
 		runChildEnv + "=1",
 		runRootEnv + "=" + root,
 		"HOME=" + root,
 		"JAVA_HOME=" + filepath.Join(root, "java-home"),
-		"JAVA_TOOL_OPTIONS=" + runInitialOptions + " -Djava.security.properties=" + filepath.Join(root, "java-security.properties"),
+		"JAVA_TOOL_OPTIONS=" + initialOptions + " -Djava.security.properties=" + filepath.Join(root, "java-security.properties"),
 		calc.EnvLoadedClassCount + "=41",
 	}
 	if output, err := cmd.CombinedOutput(); err != nil {
